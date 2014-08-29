@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://siz.org/DiskImageDescriptorSource" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:dis="http://siz.org/DiskImageDescriptorSource">
+
+    <complexType name="FileType">
+    	<attribute name="sourcename">
+    		<simpleType>
+    			<restriction base="string">
+    				<minLength value="1"></minLength>
+    			</restriction>
+    		</simpleType>
+    	</attribute>
+    	<attribute name="name" type="dis:CommodoreNameType" />
+    	<attribute name="type" type="dis:FileTypeType" />
+    	<attribute name="protected" type="boolean" />
+    	<attribute name="unclosed" type="boolean" />
+    </complexType>
+
+    <simpleType name="FileTypeType">
+    	<restriction base="string">
+    		<enumeration value="prg" />
+    		<enumeration value="seq" />
+    		<enumeration value="del" />
+    	</restriction>
+    </simpleType>
+
+
+    <complexType name="HeaderType">
+    	<sequence>
+    		<element name="name" type="dis:CommodoreNameType"
+    			minOccurs="1" maxOccurs="1">
+    		</element>
+    		<element name="type" minOccurs="1" maxOccurs="1">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="d64"></enumeration>
+    					<enumeration value="d64_40"></enumeration>
+    					<enumeration value="d71"></enumeration>
+    					<enumeration value="d81"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<choice minOccurs="1" maxOccurs="1">
+    			<element name="idandtype" minOccurs="1" maxOccurs="1">
+    				<simpleType>
+    					<restriction base="string">
+    						<minLength value="1"></minLength>
+    						<maxLength value="5"></maxLength>
+    					</restriction>
+    				</simpleType>
+    			</element>
+    			<element name="id" minOccurs="1" maxOccurs="1">
+    				<simpleType>
+    					<restriction base="string">
+    						<length value="2"></length>
+    					</restriction>
+    				</simpleType>
+    			</element>
+    		</choice>
+    	</sequence>
+    </complexType>
+
+
+
+    <complexType name="FilesType">
+    	<sequence>
+    		<element name="file" type="dis:FileType" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+
+    <simpleType name="CommodoreNameType">
+    	<restriction base="string">
+    		<minLength value="1"></minLength>
+    		<maxLength value="16"></maxLength>
+    		<whiteSpace value="collapse"></whiteSpace>
+    	</restriction>
+    </simpleType>
+
+    <element name="diskimage" type="dis:DiskImageType"></element>
+
+    <complexType name="DiskImageType">
+    	<sequence>
+    		<element name="header" type="dis:HeaderType" maxOccurs="1" minOccurs="1"></element>
+    		<element name="files" type="dis:FilesType" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    </complexType>
+</schema>

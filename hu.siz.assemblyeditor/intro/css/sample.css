@@ -1,0 +1,3 @@
+
+a#hu.siz.assemblyeditor-introLink img { background-image : url(graphics/sample.gif); }
+a#hu.siz.assemblyeditor-introLink:hover img { background-image : url(graphics/sample_hov.gif); }
