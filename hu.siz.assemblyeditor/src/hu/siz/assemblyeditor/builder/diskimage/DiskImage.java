@@ -146,6 +146,9 @@ public class DiskImage {
 			track = this.tracks.get(trackNumber - 1);
 		}
 
+		if (sectorNumber >= track.getNumberOfSectors()) {
+			sectorNumber = 0;
+		}
 		DiskSector sector = track.getSector(sectorNumber);
 		int firstSectorInTrack = -1;
 		while (sector != null) {
