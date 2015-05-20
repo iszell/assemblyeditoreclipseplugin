@@ -94,55 +94,48 @@ public class TAssCompiler extends AssemblyCompiler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * hu.siz.assemblyeditor.builder.AssemblyCompiler#ProcessErrorLine(java
+	 * @see hu.siz.assemblyeditor.builder.AssemblyCompiler#ProcessErrorLine(java
 	 * .lang.String)
 	 */
 	@Override
 	protected void processErrorLine(String line) {
-		Integer lineNumber = null;
-		String message = null;
-		int colonPosition;
-		if (line.indexOf("[**Fatal**]") != -1 && line.indexOf('(') > -1) { //$NON-NLS-1$
-			String tmpLine = line.substring(line.indexOf('(') + 1);
-			colonPosition = tmpLine.indexOf(':');
-			if (colonPosition != -1) {
-				// Integer value between the first and second ':'
-				lineNumber = Integer.valueOf(tmpLine.substring(
-						colonPosition + 1, tmpLine.indexOf(')',
-								colonPosition + 1)));
-				message = tmpLine.substring(tmpLine.indexOf(']') + 2);
+		final String[] parts = line.split(":");
+		/*
+		 * Ignore lines with less than 5 parts (1: filename, 2: line number, 3:
+		 * column, 4: severity, 5+: message)
+		 */
+		if (parts.length >= 5) {
+			final String filename = parts[0].trim();
+			final Integer lineNumber = Integer.parseInt(parts[1]);
+			final Integer column = Integer.parseInt(parts[2]);
+			final String severity = parts[3].trim();
+			final StringBuilder sb = new StringBuilder();
+			for (int i = 4; i < parts.length; i++) {
+				if (sb.length() != 0) {
+					sb.append(":");
+				}
+				sb.append(parts[i]);
 			}
-		} else {
-			colonPosition = line.indexOf(':');
-			if (colonPosition != -1) {
-				// Integer value between the first and second ':'
-				lineNumber = Integer.valueOf(line.substring(colonPosition + 1,
-						line.indexOf(':', colonPosition + 1)));
-				message = line
-						.substring(line.indexOf(':', colonPosition + 1) + 2);
+			final String message = sb.toString().trim();
+			final IResource res = this.resource.getProject().findMember(
+					this.resource.getProjectRelativePath()
+							.removeLastSegments(1).append(filename));
+			if (res != null) {
+				if ("warning".equals(severity)) {
+					this.handler.addWarning(res, message, lineNumber, column,
+							null);
+				} else if ("error".equals(severity)) {
+					this.handler.addError(res, message, lineNumber, column,
+							null);
+				}
 			}
-		}
-		if (message == null) {
-			message = line;
-		}
-		// String after the space following the second ':'
-
-		if (message.startsWith("warning")) { //$NON-NLS-1$
-			message = message.substring(9);
-			this.handler.addWarning(this.resource, message, lineNumber, null,
-					null);
-		} else {
-			this.handler.addError(this.resource, message, lineNumber, null,
-					null);
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * hu.siz.assemblyeditor.builder.AssemblyCompiler#ProcessInputLine(java
+	 * @see hu.siz.assemblyeditor.builder.AssemblyCompiler#ProcessInputLine(java
 	 * .lang.String)
 	 */
 	@Override
@@ -153,8 +146,7 @@ public class TAssCompiler extends AssemblyCompiler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * hu.siz.assemblyeditor.builder.ICompiler#getDerviceResourceNames(org.
+	 * @see hu.siz.assemblyeditor.builder.ICompiler#getDerviceResourceNames(org.
 	 * eclipse.core.resources.IResource)
 	 */
 	@Override
@@ -182,8 +174,9 @@ public class TAssCompiler extends AssemblyCompiler {
 		String name = null;
 
 		if (line.contains(".include") || line.contains(".binary")) { //$NON-NLS-1$ //$NON-NLS-2$
-			name = line.substring(line.indexOf(STRING_SEPARATOR) + 1, line
-					.indexOf(STRING_SEPARATOR,
+			name = line.substring(
+					line.indexOf(STRING_SEPARATOR) + 1,
+					line.indexOf(STRING_SEPARATOR,
 							line.indexOf(STRING_SEPARATOR) + 1));
 		}
 
