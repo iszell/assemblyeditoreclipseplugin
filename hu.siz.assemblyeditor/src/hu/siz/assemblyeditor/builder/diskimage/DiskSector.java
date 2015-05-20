@@ -102,4 +102,10 @@ public class DiskSector {
 	public void setData(byte[] data) {
 		this.data = data;
 	}
+
+	@Override
+	public String toString() {
+		return "DiskSector [nextSector=" + nextSector + ", errorCode="
+				+ errorCode + "]";
+	}
 }

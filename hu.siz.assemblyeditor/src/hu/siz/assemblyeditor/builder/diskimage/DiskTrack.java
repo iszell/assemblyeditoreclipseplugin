@@ -11,6 +11,10 @@ import java.util.List;
  * 
  * @author siz
  */
+/**
+ * @author Siz
+ * 
+ */
 public class DiskTrack {
 
 	private List<DiskSector> sectors;
@@ -90,5 +94,10 @@ public class DiskTrack {
 	 */
 	public int getNumberOfSectors() {
 		return this.sectors.size();
+	}
+
+	@Override
+	public String toString() {
+		return "DiskTrack [sectors=" + sectors + "]";
 	}
 }

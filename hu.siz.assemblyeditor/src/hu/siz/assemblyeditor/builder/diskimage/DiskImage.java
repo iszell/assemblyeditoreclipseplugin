@@ -308,22 +308,22 @@ public class DiskImage {
 		for (int trackNum = 1; trackNum <= this.tracks.size(); trackNum++) {
 			DiskTrack track = this.tracks.get(trackNum - 1);
 			byte freeSectors = 0;
-			int sectorMap = 0;
+			byte sectorMap = 0;
 			byte[] sectorMapArray = new byte[3];
 			int sectorMapPtr = 0;
 			for (int sectorNum = 0; sectorNum < track.getNumberOfSectors(); sectorNum++) {
 				if (sectorNum != 0 && sectorNum % 8 == 0) {
-					sectorMapArray[sectorMapPtr++] = (byte) (sectorMap & 0xff);
+					sectorMapArray[sectorMapPtr++] = sectorMap;
 					sectorMap = 0;
 				}
 				DiskSector sec = track.getSector(sectorNum);
-				sectorMap = sectorMap << 1;
+				sectorMap = (byte) (sectorMap << 1);
 				if (sec == null) {
-					sectorMap = sectorMap + 1;
+					sectorMap |= 1;
 					freeSectors++;
 				}
 			}
-			sectorMapArray[sectorMapPtr++] = (byte) (sectorMap & 0xff);
+			sectorMapArray[sectorMapPtr++] = sectorMap;
 			try {
 				data.write(freeSectors);
 				data.write(sectorMapArray);
