@@ -124,7 +124,8 @@ public class TAssCompiler extends AssemblyCompiler {
 				if ("warning".equals(severity)) {
 					this.handler.addWarning(res, message, lineNumber, column,
 							null);
-				} else if ("error".equals(severity)) {
+				} else if ("error".equals(severity)
+						|| "fatal error".equals(severity)) {
 					this.handler.addError(res, message, lineNumber, column,
 							null);
 				}
