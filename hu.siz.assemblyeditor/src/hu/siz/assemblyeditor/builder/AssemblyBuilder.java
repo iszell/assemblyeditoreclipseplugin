@@ -249,8 +249,8 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 					IResource res = resource.getWorkspace().getRoot()
 							.findMember(dependent);
 					if (res != null) {
-						System.out.println("Compiling dependent resource "
-								+ res.getName());
+						// System.out.println("Compiling dependent resource "
+						// + res.getName());
 						this.compileResource(res, monitor);
 					}
 					if (monitor.isCanceled()) {
@@ -300,11 +300,11 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 				if (depRes != null) {
 					dependency = depRes.getFullPath().toString();
 				} else {
-					System.out.println("Can't find dependency " + dep);
+					// System.out.println("Can't find dependency " + dep);
 					dependency = dep;
 				}
-				System.out.println("Adding dependency " + resourcePath
-						+ " for " + dependency);
+				// System.out.println("Adding dependency " + resourcePath
+				// + " for " + dependency);
 				ResourceDependencies.getInstance()
 						.add(dependency, resourcePath);
 			}

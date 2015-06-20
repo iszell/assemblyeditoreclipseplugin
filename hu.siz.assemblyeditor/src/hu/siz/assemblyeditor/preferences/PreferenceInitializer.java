@@ -24,6 +24,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PreferenceConstants.P_EMULATOR, PreferenceConstants.P_EMULATOR_YAPE);
 		store.setDefault(PreferenceConstants.P_EMULATORPATH, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.P_MAKEDISKPATH, ""); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.P_TASSVERSION, "new"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.P_TASSPATH, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.P_TASSOPTNOSTART, false);
 		store.setDefault(PreferenceConstants.P_TASSOPTLONGBRANCH, false);

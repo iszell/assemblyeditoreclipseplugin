@@ -100,17 +100,40 @@ public class TAssCompiler extends AssemblyCompiler {
 	@Override
 	protected void processErrorLine(String line) {
 		final String[] parts = line.split(":");
-		/*
-		 * Ignore lines with less than 5 parts (1: filename, 2: line number, 3:
-		 * column, 4: severity, 5+: message)
-		 */
-		if (parts.length >= 5) {
-			final String filename = parts[0].trim();
-			final Integer lineNumber = Integer.parseInt(parts[1]);
-			final Integer column = Integer.parseInt(parts[2]);
-			final String severity = parts[3].trim();
+		final int i_filename;
+		final int i_lineNumber;
+		final Integer i_column;
+		final Integer i_serverity;
+		final int i_message;
+
+		if ("new".equals(this.store
+				.getString(PreferenceConstants.P_TASSVERSION))) {
+			/*
+			 * Ignore lines with less than 5 parts (1: filename, 2: line number,
+			 * 3: column, 4: severity, 5+: message)
+			 */
+			i_filename = 0;
+			i_lineNumber = 1;
+			i_column = 2;
+			i_serverity = 3;
+			i_message = 4;
+		} else {
+			i_filename = 0;
+			i_lineNumber = 1;
+			i_column = null;
+			i_serverity = null;
+			i_message = 2;
+		}
+
+		if (parts.length > i_message) {
+			final String filename = parts[i_filename].trim();
+			final Integer lineNumber = Integer.parseInt(parts[i_lineNumber]);
+			final Integer column = i_column == null ? null : Integer
+					.parseInt(parts[i_column]);
+			final String severity = i_serverity == null ? "error"
+					: parts[i_serverity].trim();
 			final StringBuilder sb = new StringBuilder();
-			for (int i = 4; i < parts.length; i++) {
+			for (int i = i_message; i < parts.length; i++) {
 				if (sb.length() != 0) {
 					sb.append(":");
 				}

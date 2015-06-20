@@ -48,7 +48,7 @@ public class PreferenceConstants {
 
 	// Path to 64tass.exe
 	public static final String P_TASSPATH = "TAssPath"; //$NON-NLS-1$
-	// 64Tass preferences
+	//// 64Tass preferences
 	// --nostart
 	public static final String P_TASSOPTNOSTART = "TassOptNoStart"; //$NON-NLS-1$
 	// --long-branch
@@ -61,6 +61,8 @@ public class PreferenceConstants {
 	public static final String P_TASSOPTWORDSTART = "TAssOptWordStart"; //$NON-NLS-1$
 	// Architecture
 	public static final String P_TASSOPTARCHITECTURE = "TAssOptArchitecture"; //$NON-NLS-1$
+	// TAss compiler version
+	public static final String P_TASSVERSION = "TAssOptTassVersion"; //$NON-NLS-1$
 	public static final String P_TASSOPTCREATELISTING = "TAssOptCreateListing"; //$NON-NLS-1$
 	public static final String P_TASSCMDLINE = "TAssCmdLine"; //$NON-NLS-1$
 

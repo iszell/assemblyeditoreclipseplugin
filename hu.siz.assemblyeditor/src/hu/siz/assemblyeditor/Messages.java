@@ -53,6 +53,9 @@ public class Messages extends NLS {
 	public static String TAssPreferences_ReplaceLongBranch;
 	public static String TAssPreferences_SuppressStartAddress;
 	public static String TAssPreferences_TargetArchitecture;
+	public static String TAssPreferences_TAssVersion;
+	public static String TAssPreferences_TAssVersion_new;
+	public static String TAssPreferences_TAssVersion_old;
 	public static String TMPxPreferences_Path;
 	public static String XAPreferences_Path;
 	static {

@@ -105,6 +105,11 @@ public class AssemblyCompilerPreferences extends FieldEditorOverlayPage
 	 * @param parent
 	 */
 	private void addTAssFields(Composite parent) {
+		addField(new RadioGroupFieldEditor(PreferenceConstants.P_TASSVERSION,
+				Messages.TAssPreferences_TAssVersion, 1, new String[][] {
+						{ Messages.TAssPreferences_TAssVersion_old, "old" }, //$NON-NLS-1$
+						{ Messages.TAssPreferences_TAssVersion_new, "new" } //$NON-NLS-1$
+				}, parent), parent);
 		addField(
 				new RadioGroupFieldEditor(
 						PreferenceConstants.P_TASSOPTARCHITECTURE,
