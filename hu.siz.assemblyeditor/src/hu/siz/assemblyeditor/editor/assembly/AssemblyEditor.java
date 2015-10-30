@@ -1,9 +1,9 @@
 package hu.siz.assemblyeditor.editor.assembly;
 
-import hu.siz.assemblyeditor.editor.AssemblyColorManager;
-
 import org.eclipse.ui.editors.text.TextEditor;
-import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.eclipse.ui.editors.text.TextFileDocumentProvider;
+
+import hu.siz.assemblyeditor.editor.AssemblyColorManager;
 
 /**
  * Assembly source editor
@@ -24,22 +24,7 @@ public class AssemblyEditor extends TextEditor {
 		this.colorManager = new AssemblyColorManager();
 		setSourceViewerConfiguration(new AssemblySourceViewerConfiguration(
 				this.colorManager));
-		setDocumentProvider(new AssemblyDocumentProvider());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.editors.text.TextEditor#getAdapter(java.lang.Class)
-	 */
-	@SuppressWarnings("rawtypes")
-	@Override
-	public Object getAdapter(Class adapter) {
-		if (IContentOutlinePage.class.equals(adapter)) {
-			return new AssemblySourceContentOutlinePage(getDocumentProvider(),
-					getEditorInput(), this);
-		}
-		return super.getAdapter(adapter);
+		setDocumentProvider(new TextFileDocumentProvider());
 	}
 
 	/*

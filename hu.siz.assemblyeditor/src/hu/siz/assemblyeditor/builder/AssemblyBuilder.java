@@ -137,10 +137,10 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 				}
 				marker.setAttribute(IMarker.LINE_NUMBER, actualLineNumber);
 				if (startCol != null) {
-					marker.setAttribute(IMarker.CHAR_START, startCol);
+//					marker.setAttribute(IMarker.CHAR_START, startCol);
 				}
 				if (endCol != null) {
-					marker.setAttribute(IMarker.CHAR_END, endCol);
+//					marker.setAttribute(IMarker.CHAR_END, endCol);
 				}
 			} catch (CoreException e) {
 				AssemblyUtils.createLogEntry(e);

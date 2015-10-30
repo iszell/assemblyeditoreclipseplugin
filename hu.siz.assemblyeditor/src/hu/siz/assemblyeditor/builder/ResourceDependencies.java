@@ -3,8 +3,6 @@
  */
 package hu.siz.assemblyeditor.builder;
 
-import hu.siz.assemblyeditor.AssemblyEditorPlugin;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
@@ -18,12 +16,15 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
+
+import hu.siz.assemblyeditor.AssemblyEditorPlugin;
+import hu.siz.assemblyeditor.utils.AssemblyUtils;
 
 /**
  * @author siz
@@ -152,6 +153,7 @@ public class ResourceDependencies {
 					.readObject();
 			input.close();
 		} catch (Exception e) {
+			AssemblyUtils.createLogEntry(e);
 			resourceDependencies = new HashMap<String, Set<String>>();
 		}
 	}

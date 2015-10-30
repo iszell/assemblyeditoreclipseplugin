@@ -1,12 +1,6 @@
 package hu.siz.assemblyeditor.editor.assembly;
 
-import hu.siz.assemblyeditor.AssemblyEditorPlugin;
-import hu.siz.assemblyeditor.editor.AssemblyColorManager;
-import hu.siz.assemblyeditor.editor.IColorConstants;
-import hu.siz.assemblyeditor.preferences.PreferenceConstants;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -19,6 +13,11 @@ import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
+
+import hu.siz.assemblyeditor.AssemblyEditorPlugin;
+import hu.siz.assemblyeditor.editor.AssemblyColorManager;
+import hu.siz.assemblyeditor.editor.IColorConstants;
+import hu.siz.assemblyeditor.preferences.PreferenceConstants;
 
 public class AssemblySourceViewerConfiguration extends
 		TextSourceViewerConfiguration {
@@ -41,8 +40,6 @@ public class AssemblySourceViewerConfiguration extends
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
 		List<String> contentTypes = new ArrayList<String>();
 		contentTypes.add(IDocument.DEFAULT_CONTENT_TYPE);
-		contentTypes.addAll(Arrays.asList(AssemblyPartitionScanner
-				.getContentTypes()));
 		return contentTypes.toArray(new String[contentTypes.size()]);
 	}
 
@@ -105,22 +102,6 @@ public class AssemblySourceViewerConfiguration extends
 				getSourceScanner());
 		reconciler.setDamager(defaultRepairer, IDocument.DEFAULT_CONTENT_TYPE);
 		reconciler.setRepairer(defaultRepairer, IDocument.DEFAULT_CONTENT_TYPE);
-
-		NonRuleBasedDamagerRepairer commentRepairer = new NonRuleBasedDamagerRepairer(
-				new TextAttribute(this.colorManager
-						.getColor(IColorConstants.ASM_COMMENT)));
-		reconciler.setDamager(commentRepairer,
-				AssemblyPartitionScanner.ASM_COMMENT);
-		reconciler.setRepairer(commentRepairer,
-				AssemblyPartitionScanner.ASM_COMMENT);
-
-		NonRuleBasedDamagerRepairer stringRepairer = new NonRuleBasedDamagerRepairer(
-				new TextAttribute(
-						this.colorManager.getColor(IColorConstants.STRING)));
-		reconciler.setDamager(stringRepairer,
-				AssemblyPartitionScanner.ASM_STRING);
-		reconciler.setRepairer(stringRepairer,
-				AssemblyPartitionScanner.ASM_STRING);
 
 		return reconciler;
 	}

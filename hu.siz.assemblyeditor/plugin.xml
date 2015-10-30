@@ -50,42 +50,6 @@
             project="true"/>
    </extension>
    <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            adaptable="true"
-            id="hu.siz.assemblyeditor.contribution1"
-            nameFilter="*.asm"
-            objectClass="org.eclipse.core.resources.IFile">
-         <menu
-               label="%popupMenuGroupName"
-               path="additions"
-               id="hu.siz.assemblyeditor.menu1">
-            <separator
-                  name="group1">
-            </separator>
-         </menu>
-         <action
-               label="%popupMenuActionConvertPETSCIItoASCII"
-               class="hu.siz.assemblyeditor.popup.actions.ConvertPETSCIItoASCII"
-               menubarPath="hu.siz.assemblyeditor.menu1/group1"
-               enablesFor="1"
-               id="hu.siz.assemblyeditor.action1">
-         </action>
-         <action
-               class="hu.siz.assemblyeditor.popup.actions.ConvertASCIItoPETSCII"
-               enablesFor="1"
-               id="hu.siz.assemblyeditor.action2"
-               label="%popupMenuActionConvertASCIItoPETSCII"
-               menubarPath="hu.siz.assemblyeditor.menu1/group1"/>
-         <action
-               class="hu.siz.assemblyeditor.popup.actions.FormatSource"
-               enablesFor="1"
-               id="hu.siz.assemblyeditor.action3"
-               label="%popupMenuActionFormatSource"
-               menubarPath="hu.siz.assemblyeditor.menu1/group1"/>
-      </objectContribution>
-   </extension>
-   <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
             class="hu.siz.assemblyeditor.preferences.PreferenceInitializer">
@@ -187,30 +151,6 @@
             file="testToc.xml"
             primary="true">
       </toc>
-   </extension>
-   <extension
-         point="org.eclipse.ui.actionSets">
-      <actionSet
-            label="Sample Action Set"
-            visible="true"
-            id="hu.siz.assemblyeditor.actionSet">
-         <menu
-               label="Sample &amp;Menu"
-               id="sampleMenu">
-            <separator
-                  name="sampleGroup">
-            </separator>
-         </menu>
-         <action
-               label="&amp;Sample Action"
-               icon="icons/assembly.gif"
-               class="hu.siz.assemblyeditor.actions.SampleAction"
-               tooltip="Hello, Eclipse world"
-               menubarPath="sampleMenu/sampleGroup"
-               toolbarPath="sampleGroup"
-               id="hu.siz.assemblyeditor.actions.SampleAction">
-         </action>
-      </actionSet>
    </extension>
    <extension
          point="org.eclipse.core.contenttype.contentTypes">

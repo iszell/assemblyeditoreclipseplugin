@@ -59,13 +59,18 @@ public class LabelRule implements IPredicateRule {
 		if (isFirstNonSpaceInLine(scanner)) {
 			int c = scanner.read();
 			if (!wd.isWhitespace(c)) {
+				final StringBuilder sb = new StringBuilder();
 				while (!wd.isWhitespace(c)) {
+					sb.append((char) c);
 					c = scanner.read();
 				}
 				if (c != ICharacterScanner.EOF) {
 					scanner.unread();
 				}
-				return getSuccessToken();
+//				final String word = sb.toString();
+//				if(word.charAt(0)!='.') {
+					return getSuccessToken();
+//				}
 			} else {
 				scanner.unread();
 			}

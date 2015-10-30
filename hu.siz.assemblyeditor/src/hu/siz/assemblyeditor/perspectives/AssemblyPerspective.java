@@ -58,10 +58,6 @@ public class AssemblyPerspective implements IPerspectiveFactory {
 		IFolderLayout topRight = this.factory.createFolder("topRight", //$NON-NLS-1$
 				IPageLayout.RIGHT, 0.8f, this.factory.getEditorArea());
 		topRight.addView(IPageLayout.ID_OUTLINE);
-
-		this.factory.addFastView("org.eclipse.team.ccvs.ui.RepositoriesView", 0.50f); //$NON-NLS-1$
-		this.factory.addFastView(
-				"org.eclipse.team.sync.views.SynchronizeView", 0.50f); //$NON-NLS-1$
 	}
 
 	private void addActionSets() {
