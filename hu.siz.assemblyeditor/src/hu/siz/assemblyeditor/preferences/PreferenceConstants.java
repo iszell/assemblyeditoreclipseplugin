@@ -64,6 +64,7 @@ public class PreferenceConstants {
 	// TAss compiler version
 	public static final String P_TASSVERSION = "TAssOptTassVersion"; //$NON-NLS-1$
 	public static final String P_TASSOPTCREATELISTING = "TAssOptCreateListing"; //$NON-NLS-1$
+	public static final String P_TASSOPTCREATELABELS = "TAssOptCreateLabels"; //$NON-NLS-1$
 	public static final String P_TASSCMDLINE = "TAssCmdLine"; //$NON-NLS-1$
 
 	// Path to CA65.exe

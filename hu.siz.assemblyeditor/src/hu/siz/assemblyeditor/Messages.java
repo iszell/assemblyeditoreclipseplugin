@@ -44,6 +44,7 @@ public class Messages extends NLS {
 	public static String TAssPreferences_65xx;
 	public static String TAssPreferences_65xx_undocumented;
 	public static String TAssPreferences_CaseSensitive;
+	public static String TAssPreferences_CreateLabels;
 	public static String TAssPreferences_CreateListing;
 	public static String TAssPreferences_cpu64;
 	public static String TAssPreferences_Description;

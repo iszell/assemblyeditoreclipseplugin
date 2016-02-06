@@ -33,6 +33,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PreferenceConstants.P_TASSOPTWORDSTART, false);
 		store.setDefault(PreferenceConstants.P_TASSOPTARCHITECTURE, "--m65xx"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.P_TASSOPTCREATELISTING, true);
+		store.setDefault(PreferenceConstants.P_TASSOPTCREATELABELS, false);
 		store.setDefault(PreferenceConstants.P_TASSCMDLINE, "--ascii"); //$NON-NLS-1$
 	}
 }

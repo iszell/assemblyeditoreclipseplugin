@@ -139,6 +139,9 @@ public class AssemblyCompilerPreferences extends FieldEditorOverlayPage
 		addField(new BooleanFieldEditor(
 				PreferenceConstants.P_TASSOPTCREATELISTING,
 				Messages.TAssPreferences_CreateListing, parent), parent);
+		addField(new BooleanFieldEditor(
+				PreferenceConstants.P_TASSOPTCREATELABELS,
+				Messages.TAssPreferences_CreateLabels, parent), parent);
 		addField(new StringFieldEditor(PreferenceConstants.P_TASSCMDLINE,
 				Messages.TAssPreferences_OtherOptions, parent), parent);
 	}

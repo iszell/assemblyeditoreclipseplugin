@@ -20,6 +20,7 @@ public class TAssCompiler extends AssemblyCompiler {
 
 	private static final String STRING_SEPARATOR = "\""; //$NON-NLS-1$
 	private boolean hasListing = false;
+	private boolean hasLabels = false;
 
 	public TAssCompiler() {
 		super();
@@ -83,6 +84,16 @@ public class TAssCompiler extends AssemblyCompiler {
 						.removeFileExtension()
 						.addFileExtension("lst").toOSString()); //$NON-NLS-1$
 				this.hasListing = true;
+			}
+
+			// append label file name
+			if (this.store
+					.getBoolean(PreferenceConstants.P_TASSOPTCREATELABELS)) {
+				this.compileCommand.append(" -l "); //$NON-NLS-1$
+				this.compileCommand.append(this.resource.getLocation()
+						.removeFileExtension()
+						.addFileExtension("lbl").toOSString()); //$NON-NLS-1$
+				this.hasLabels = true;
 			}
 
 			// append source name
@@ -181,6 +192,10 @@ public class TAssCompiler extends AssemblyCompiler {
 		if (this.hasListing) {
 			names.add(resource.getLocation().removeFileExtension()
 					.addFileExtension("lst").toFile().getName()); //$NON-NLS-1$
+		}
+		if (this.hasLabels) {
+			names.add(resource.getLocation().removeFileExtension()
+					.addFileExtension("lbl").toFile().getName()); //$NON-NLS-1$
 		}
 
 		return names;
