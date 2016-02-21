@@ -1,9 +1,5 @@
 package hu.siz.assemblyeditor.preferences;
 
-import hu.siz.assemblyeditor.AssemblyEditorPlugin;
-import hu.siz.assemblyeditor.Messages;
-import hu.siz.assemblyeditor.properties.FieldEditorOverlayPage;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +8,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
+import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.SWT;
@@ -20,6 +17,10 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+
+import hu.siz.assemblyeditor.AssemblyEditorPlugin;
+import hu.siz.assemblyeditor.Messages;
+import hu.siz.assemblyeditor.properties.FieldEditorOverlayPage;
 
 /**
  * Assembly editor preference page
@@ -97,6 +98,10 @@ public class AssemblyCompilerPreferences extends FieldEditorOverlayPage
 										Messages.AssemblyCompilerPreferences_Compiler_XA,
 										PreferenceConstants.P_COMPILER_XA }, },
 						parent), parent);
+		addField(new FileFieldEditor(PreferenceConstants.P_POSTPROCESSORPATH,
+				Messages.PostProcess_Path, true, parent), parent);
+		addField(new StringFieldEditor(PreferenceConstants.P_POSTPROCESSCMDLINE,
+				Messages.PostProcess_CommandLine, parent), parent);
 	}
 
 	/**

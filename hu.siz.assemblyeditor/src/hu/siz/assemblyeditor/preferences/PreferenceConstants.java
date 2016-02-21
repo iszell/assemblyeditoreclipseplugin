@@ -75,4 +75,8 @@ public class PreferenceConstants {
 
 	// Path to xa.exe
 	public static final String P_XAPATH = "XAPath"; //$NON-NLS-1$
+	
+	// Path to postprocessor command
+	public static final String P_POSTPROCESSORPATH = "PostProcessorPath"; //$NON-NLS-1$
+	public static final String P_POSTPROCESSCMDLINE = "PostProcessCmdLine"; //$NON-NLS-1$
 }

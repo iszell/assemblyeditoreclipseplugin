@@ -36,6 +36,8 @@ public class Messages extends NLS {
 	public static String FieldEditorOverlayPage_UseCustomizedSettings;
 	public static String FieldEditorOverlayPage_UseWorkspaceSettings;
 	public static String NewAssemblyProjectWizard_Error;
+	public static String PostProcess_Path;
+	public static String PostProcess_CommandLine;
 	public static String PropertyStore_CannotWriteResourceProperty;
 	public static String TAssPreferences_2byteStartAddress;
 	public static String TAssPreferences_6502;

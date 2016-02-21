@@ -81,8 +81,9 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 		 * 
 		 * @param IProgressMonitor
 		 *            monitor - progress monitor for process
-		 * @param boolean mode - MODE_CLEAN - project is cleaned; MODE_BUILD -
-		 *        project is built
+		 * @param boolean
+		 *            mode - MODE_CLEAN - project is cleaned; MODE_BUILD -
+		 *            project is built
 		 */
 		public AssemblyResourceVisitor(IProgressMonitor monitor, boolean mode) {
 			super();
@@ -106,26 +107,20 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 	 * Internal error handler class: adds resource markers
 	 */
 	class AssemblyErrorHandler {
-		public void addError(IResource resource, String message,
-				Integer lineNumber, Integer startCol, Integer endCol) {
-			addMarker(resource, message, lineNumber, IMarker.SEVERITY_ERROR,
-					startCol, endCol);
+		public void addError(IResource resource, String message, Integer lineNumber, Integer startCol, Integer endCol) {
+			addMarker(resource, message, lineNumber, IMarker.SEVERITY_ERROR, startCol, endCol);
 		}
 
-		public void addWarning(IResource resource, String message,
-				Integer lineNumber, Integer startCol, Integer endCol) {
-			addMarker(resource, message, lineNumber, IMarker.SEVERITY_WARNING,
-					startCol, endCol);
+		public void addWarning(IResource resource, String message, Integer lineNumber, Integer startCol,
+				Integer endCol) {
+			addMarker(resource, message, lineNumber, IMarker.SEVERITY_WARNING, startCol, endCol);
 		}
 
-		public void addInfo(IResource resource, String message,
-				Integer lineNumber, Integer startCol, Integer endCol) {
-			addMarker(resource, message, lineNumber, IMarker.SEVERITY_INFO,
-					startCol, endCol);
+		public void addInfo(IResource resource, String message, Integer lineNumber, Integer startCol, Integer endCol) {
+			addMarker(resource, message, lineNumber, IMarker.SEVERITY_INFO, startCol, endCol);
 		}
 
-		private void addMarker(IResource resource, String message,
-				Integer lineNumber, int severity, Integer startCol,
+		private void addMarker(IResource resource, String message, Integer lineNumber, int severity, Integer startCol,
 				Integer endCol) {
 			try {
 				IMarker marker = resource.createMarker(MARKER_TYPE);
@@ -137,10 +132,10 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 				}
 				marker.setAttribute(IMarker.LINE_NUMBER, actualLineNumber);
 				if (startCol != null) {
-//					marker.setAttribute(IMarker.CHAR_START, startCol);
+					// marker.setAttribute(IMarker.CHAR_START, startCol);
 				}
 				if (endCol != null) {
-//					marker.setAttribute(IMarker.CHAR_END, endCol);
+					// marker.setAttribute(IMarker.CHAR_END, endCol);
 				}
 			} catch (CoreException e) {
 				AssemblyUtils.createLogEntry(e);
@@ -159,8 +154,7 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 	 */
 	@SuppressWarnings("rawtypes")
 	@Override
-	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
-			throws CoreException {
+	protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException {
 		if (kind == FULL_BUILD || kind == CLEAN_BUILD) {
 			fullBuild(monitor);
 		} else {
@@ -177,9 +171,7 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 	@Override
 	protected void clean(IProgressMonitor monitor) throws CoreException {
 		ResourceDependencies.getInstance().clean(getProject());
-		getProject().accept(
-				new AssemblyResourceVisitor(monitor,
-						AssemblyResourceVisitor.MODE_CLEAN));
+		getProject().accept(new AssemblyResourceVisitor(monitor, AssemblyResourceVisitor.MODE_CLEAN));
 	}
 
 	/*
@@ -188,40 +180,31 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 	private void compileResource(IResource resource, IProgressMonitor monitor) {
 		if (resource instanceof IFile) {
 
-			monitor.subTask(Messages.AssemblyBuilder_Compiling
-					+ resource.getName());
+			monitor.subTask(Messages.AssemblyBuilder_Compiling + resource.getName());
 
 			ICompiler compiler = null;
 			deleteMarkers((IFile) resource);
 
-			IPreferenceStore store = new PropertyStore(resource,
-					AssemblyEditorPlugin.getDefault().getPreferenceStore(),
+			IPreferenceStore store = new PropertyStore(resource, AssemblyEditorPlugin.getDefault().getPreferenceStore(),
 					AssemblyEditorPlugin.PLUGIN_ID);
 
 			String ext = resource.getFileExtension();
 			if (EXT_ASM.equals(ext) || EXT_INC.equals(ext)) {
-				String compilername = store
-						.getString(PreferenceConstants.P_COMPILER);
+				String compilername = store.getString(PreferenceConstants.P_COMPILER);
 
 				if (compilername.equals(PreferenceConstants.P_COMPILER_64TASS)) {
 					compiler = new TAssCompiler();
-				} else if (compilername
-						.equals(PreferenceConstants.P_COMPILER_AS65)) {
+				} else if (compilername.equals(PreferenceConstants.P_COMPILER_AS65)) {
 					compiler = new As65Compiler();
-				} else if (compilername
-						.equals(PreferenceConstants.P_COMPILER_CA65)) {
+				} else if (compilername.equals(PreferenceConstants.P_COMPILER_CA65)) {
 					compiler = new CA65Compiler();
-				} else if (compilername
-						.equals(PreferenceConstants.P_COMPILER_DASM)) {
+				} else if (compilername.equals(PreferenceConstants.P_COMPILER_DASM)) {
 					compiler = new DAsmCompiler();
-				} else if (compilername
-						.equals(PreferenceConstants.P_COMPILER_SNAsm)) {
+				} else if (compilername.equals(PreferenceConstants.P_COMPILER_SNAsm)) {
 					compiler = new SNAsmCompiler();
-				} else if (compilername
-						.equals(PreferenceConstants.P_COMPILER_TMPX)) {
+				} else if (compilername.equals(PreferenceConstants.P_COMPILER_TMPX)) {
 					compiler = new TMPxCompiler();
-				} else if (compilername
-						.equals(PreferenceConstants.P_COMPILER_XA)) {
+				} else if (compilername.equals(PreferenceConstants.P_COMPILER_XA)) {
 					compiler = new XACompiler();
 				}
 
@@ -233,8 +216,15 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 
 			if (compiler != null) {
 				if (!EXT_INC.equals(ext)) {
-					compiler.compile(resource, new AssemblyErrorHandler(),
-							monitor, store);
+					compiler.compile(resource, new AssemblyErrorHandler(), monitor, store);
+					String postProcessor = store.getString(PreferenceConstants.P_POSTPROCESSORPATH);
+					if (postProcessor != null && postProcessor.length() != 0) {
+						IResource prg = resource.getParent()
+								.findMember(resource.getFullPath().removeFileExtension().addFileExtension("prg").lastSegment());
+						if (prg != null) {
+							new PostProcessorCompiler().compile(prg, new AssemblyErrorHandler(), monitor, store);
+						}
+					}
 				}
 				addDependencies(resource, compiler, monitor);
 			}
@@ -242,12 +232,10 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 			/*
 			 * Compile dependent resources
 			 */
-			Set<String> dependencies = ResourceDependencies.getInstance().get(
-					resource);
+			Set<String> dependencies = ResourceDependencies.getInstance().get(resource);
 			if (dependencies != null) {
 				for (String dependent : dependencies) {
-					IResource res = resource.getWorkspace().getRoot()
-							.findMember(dependent);
+					IResource res = resource.getWorkspace().getRoot().findMember(dependent);
 					if (res != null) {
 						// System.out.println("Compiling dependent resource "
 						// + res.getName());
@@ -282,10 +270,8 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 	/*
 	 * Adds dependency links to all resources which the current is depends on
 	 */
-	private void addDependencies(IResource resource, ICompiler compiler,
-			IProgressMonitor monitor) {
-		monitor.subTask(Messages.AssemblyBuilder_AddingDependencies
-				+ resource.getName());
+	private void addDependencies(IResource resource, ICompiler compiler, IProgressMonitor monitor) {
+		monitor.subTask(Messages.AssemblyBuilder_AddingDependencies + resource.getName());
 
 		String resourcePath = resource.getFullPath().toString();
 		Set<String> dependencies = compiler.getDependencies(resource, monitor);
@@ -294,8 +280,7 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 				if (monitor.isCanceled()) {
 					break;
 				}
-				IResource depRes = resource.getWorkspace().getRoot()
-						.findMember(dep);
+				IResource depRes = resource.getWorkspace().getRoot().findMember(dep);
 				String dependency;
 				if (depRes != null) {
 					dependency = depRes.getFullPath().toString();
@@ -305,20 +290,16 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 				}
 				// System.out.println("Adding dependency " + resourcePath
 				// + " for " + dependency);
-				ResourceDependencies.getInstance()
-						.add(dependency, resourcePath);
+				ResourceDependencies.getInstance().add(dependency, resourcePath);
 			}
 		}
 	}
 
 	private void fullBuild(final IProgressMonitor monitor) throws CoreException {
-		getProject().accept(
-				new AssemblyResourceVisitor(monitor,
-						AssemblyResourceVisitor.MODE_BUILD));
+		getProject().accept(new AssemblyResourceVisitor(monitor, AssemblyResourceVisitor.MODE_BUILD));
 	}
 
-	private void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor)
-			throws CoreException {
+	private void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) throws CoreException {
 		// the visitor does the work.
 		delta.accept(new AssemblyDeltaVisitor(monitor));
 	}

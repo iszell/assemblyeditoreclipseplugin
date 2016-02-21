@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * Create D64 image with MakeDisk
@@ -29,7 +30,7 @@ public class MakeDiskCompiler extends AssemblyCompiler {
 	}
 
 	@Override
-	protected void createCompileCommand() {
+	protected void createCompileCommand(IProgressMonitor monitor) {
 		this.compileCommand.append(this.store
 				.getString(PreferenceConstants.P_MAKEDISKPATH));
 

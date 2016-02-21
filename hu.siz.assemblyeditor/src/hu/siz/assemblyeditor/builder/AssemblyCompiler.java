@@ -57,11 +57,9 @@ public abstract class AssemblyCompiler implements ICompiler {
 			BufferedReader in = null;
 
 			if (this.mode == MODE_STDOUT) {
-				in = new BufferedReader(new InputStreamReader(
-						AssemblyCompiler.this.process.getInputStream()));
+				in = new BufferedReader(new InputStreamReader(AssemblyCompiler.this.process.getInputStream()));
 			} else {
-				in = new BufferedReader(new InputStreamReader(
-						AssemblyCompiler.this.process.getErrorStream()));
+				in = new BufferedReader(new InputStreamReader(AssemblyCompiler.this.process.getErrorStream()));
 			}
 
 			try {
@@ -81,8 +79,29 @@ public abstract class AssemblyCompiler implements ICompiler {
 
 	/**
 	 * Creates the compile command string in <code>String compileCommand</code>
+	 * 
+	 * @param monitor
+	 *            the progress monitor instance to track progress
 	 */
-	protected abstract void createCompileCommand();
+	protected abstract void createCompileCommand(IProgressMonitor monitor);
+
+	/**
+	 * Initialize the compiler
+	 * 
+	 * @param monitor
+	 *            the progress monitor instance to track progress
+	 */
+	protected void init(IProgressMonitor monitor) {
+	};
+
+	/**
+	 * Cleanup after compile
+	 * 
+	 * @param monitor
+	 *            the progress monitor instance to track progress
+	 */
+	protected void cleanup(IProgressMonitor monitor) {
+	};
 
 	/**
 	 * Process one line of InputStream
@@ -111,12 +130,10 @@ public abstract class AssemblyCompiler implements ICompiler {
 	 * core.resources.IResource, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public Set<String> getDependencies(IResource resource,
-			IProgressMonitor monitor) {
+	public Set<String> getDependencies(IResource resource, IProgressMonitor monitor) {
 		Set<String> dependencies = new HashSet<String>();
 
-		IFile file = resource.getWorkspace().getRoot()
-				.getFile(resource.getFullPath());
+		IFile file = resource.getWorkspace().getRoot().getFile(resource.getFullPath());
 
 		String currentLine = null;
 		BufferedReader in = null;
@@ -129,19 +146,14 @@ public abstract class AssemblyCompiler implements ICompiler {
 					if (File.separatorChar == '\\') {
 						name = name.replace('/', File.separatorChar);
 					}
-					IPath dependencyPath = resource.getParent().getFullPath()
-							.append(name);
+					IPath dependencyPath = resource.getParent().getFullPath().append(name);
 					String extension = dependencyPath.getFileExtension();
 					if (extension != null) {
-						if (extension.equals("prg")) { //$NON-NLS-1$
-							dependencyPath = dependencyPath
-									.removeFileExtension().addFileExtension(
-											"asm"); //$NON-NLS-1$
+						if ("prg".equals(extension) || "lbl".equals(extension)) {
+							dependencyPath = dependencyPath.removeFileExtension().addFileExtension("asm"); //$NON-NLS-1$
 						}
-						if (extension.equals("d64")) { //$NON-NLS-1$
-							dependencyPath = dependencyPath
-									.removeFileExtension().addFileExtension(
-											"mdc"); //$NON-NLS-1$
+						if ("d64".equals(extension)) { //$NON-NLS-1$
+							dependencyPath = dependencyPath.removeFileExtension().addFileExtension("mdc"); //$NON-NLS-1$
 						}
 					}
 					dependencies.add(dependencyPath.toString());
@@ -173,10 +185,8 @@ public abstract class AssemblyCompiler implements ICompiler {
 	/**
 	 * Add compilation results to the project
 	 */
-	protected void addDerivedResource(IResource resource, String name,
-			IProgressMonitor monitor) {
-		IFile newFile = resource.getWorkspace().getRoot()
-				.getFile(resource.getParent().getFullPath().append(name));
+	protected void addDerivedResource(IResource resource, String name, IProgressMonitor monitor) {
+		IFile newFile = resource.getWorkspace().getRoot().getFile(resource.getParent().getFullPath().append(name));
 		try {
 			newFile.refreshLocal(IResource.DEPTH_ZERO, monitor);
 			newFile.setDerived(true, monitor);
@@ -193,25 +203,25 @@ public abstract class AssemblyCompiler implements ICompiler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * hu.siz.assemblyeditor.builder.ICompiler#compile(org.eclipse.core.resources
-	 * .IResource)
+	 * @see hu.siz.assemblyeditor.builder.ICompiler#compile(org.eclipse.core.
+	 * resources .IResource)
 	 */
 	@Override
-	public void compile(IResource resource, AssemblyErrorHandler handler,
-			IProgressMonitor monitor, IPreferenceStore preferenceStore) {
+	public void compile(IResource resource, AssemblyErrorHandler handler, IProgressMonitor monitor,
+			IPreferenceStore preferenceStore) {
 		this.resource = resource;
 		this.handler = handler;
 		this.store = preferenceStore;
 
 		this.compileCommand = new StringBuilder();
 
-		createCompileCommand();
+		createCompileCommand(monitor);
 
 		if (this.compileCommand.length() != 0) {
 			try {
-				this.process = Runtime.getRuntime().exec(
-						this.compileCommand.toString(), null,
+				init(monitor);
+				
+				this.process = Runtime.getRuntime().exec(this.compileCommand.toString(), null,
 						resource.getParent().getLocation().toFile());
 
 				new Thread(new ConsoleOutputProcessor(MODE_STDOUT)).start();
@@ -222,14 +232,13 @@ public abstract class AssemblyCompiler implements ICompiler {
 				for (String name : getDerivedResourceNames(resource)) {
 					addDerivedResource(resource, name, monitor);
 				}
+
+				cleanup(monitor);
 			} catch (Exception e) {
-				handler.addError(resource, e.getLocalizedMessage(), null, null,
-						null);
+				handler.addError(resource, e.getLocalizedMessage(), null, null, null);
 			}
 		} else {
-			handler.addError(resource,
-					Messages.AssemblyCompiler_CreateCompileCommandFailed, null,
-					null, null);
+			handler.addError(resource, Messages.AssemblyCompiler_CreateCompileCommandFailed, null, null, null);
 		}
 	}
 }

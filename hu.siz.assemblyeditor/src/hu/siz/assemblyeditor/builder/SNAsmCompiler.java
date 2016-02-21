@@ -6,6 +6,7 @@ package hu.siz.assemblyeditor.builder;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * @author siz
@@ -17,7 +18,7 @@ public class SNAsmCompiler extends AssemblyCompiler {
 	 * @see hu.siz.assemblyeditor.builder.AssemblyCompiler#createCompileCommand()
 	 */
 	@Override
-	protected void createCompileCommand() {
+	protected void createCompileCommand(IProgressMonitor monitor) {
 		// TODO Auto-generated method stub
 
 	}
