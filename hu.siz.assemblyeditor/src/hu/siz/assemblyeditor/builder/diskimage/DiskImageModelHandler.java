@@ -31,6 +31,7 @@ public class DiskImageModelHandler {
 	private static final String ATTRNAME_CLOSED = "closed"; //$NON-NLS-1$
 	private static final String ATTRNAME_ID = "id"; //$NON-NLS-1$
 	private static final String ATTRNAME_INTERLEAVE = "interleave"; //$NON-NLS-1$
+	private static final String ATTRNAME_USEDIRTACK = "usedirtrack"; //$NON-NLS-1$
 	private static final String ATTRNAME_LOCKED = "locked"; //$NON-NLS-1$
 	private static final String ATTRNAME_NAME = "name"; //$NON-NLS-1$
 	private static final String ATTRNAME_SOURCE = "source"; //$NON-NLS-1$
@@ -46,20 +47,20 @@ public class DiskImageModelHandler {
 
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder builder = dbf.newDocumentBuilder();
-			Document xmlDocument = builder.parse(modelFile.getRawLocation()
-					.toFile());
+			Document xmlDocument = builder.parse(modelFile.getRawLocation().toFile());
 			Element root = xmlDocument.getDocumentElement();
 
 			String name = root.getAttribute(ATTRNAME_NAME);
 			String id = root.getAttribute(ATTRNAME_ID);
 			String type = root.getAttribute(ATTRNAME_TYPE);
+			String useDirTrackString = root.getAttribute(ATTRNAME_USEDIRTACK);
+			boolean useDirTrack = "true".equals(useDirTrackString);
 			Integer interleave = null;
 			String interleaveString = root.getAttribute(ATTRNAME_INTERLEAVE);
 
 			if (type != null) {
 				try {
-					imageDescriptor = new DiskImageDescriptor(DiskImageType
-							.valueOf(type.toUpperCase()));
+					imageDescriptor = new DiskImageDescriptor(DiskImageType.valueOf(type.toUpperCase()));
 				} catch (IllegalArgumentException iae) {
 					// Ignore
 				}
@@ -72,9 +73,13 @@ public class DiskImageModelHandler {
 				}
 			}
 
-			diskImage = new DiskImage(name, id, imageDescriptor, interleave);
-			List<DiskFile> fileList = getFiles(modelFile, root
-					.getElementsByTagName(NODENAME_FILE));
+			diskImage = new DiskImage();
+			diskImage.setName(name);
+			diskImage.setId(id);
+			diskImage.setImageDescriptor(imageDescriptor);
+			diskImage.setInterleave(interleave);
+			diskImage.setUseDirTrack(useDirTrack);
+			List<DiskFile> fileList = getFiles(modelFile, root.getElementsByTagName(NODENAME_FILE));
 			if (fileList != null) {
 				diskImage.setFiles(fileList);
 			}
@@ -130,8 +135,7 @@ public class DiskImageModelHandler {
 			if ((name == null || "".equals(name)) && file != null) { //$NON-NLS-1$
 				name = file.getFullPath().removeFileExtension().lastSegment();
 			}
-			DiskFile diskFile = new DiskFile(name, -1, -1, file, fileType,
-					lockedFlag, closedFlag);
+			DiskFile diskFile = new DiskFile(name, -1, -1, file, fileType, lockedFlag, closedFlag);
 			fileList.add(diskFile);
 		}
 		return fileList;

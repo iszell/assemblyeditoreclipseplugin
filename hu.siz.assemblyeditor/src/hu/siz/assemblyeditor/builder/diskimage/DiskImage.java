@@ -3,9 +3,6 @@
  */
 package hu.siz.assemblyeditor.builder.diskimage;
 
-import hu.siz.assemblyeditor.utils.AssemblyUtils;
-import hu.siz.assemblyeditor.utils.StringUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,11 +13,18 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 
+import hu.siz.assemblyeditor.utils.AssemblyUtils;
+import hu.siz.assemblyeditor.utils.StringUtils;
+
 /**
  * @author siz
  * 
  */
 public class DiskImage {
+
+	private static final int DIRECTORY_ENTRY_SIZE = 32;
+
+	public static final DiskSector RESERVED_SECTOR = new DiskSector();
 
 	private DiskImageDescriptor imageDescriptor;
 	private List<DiskTrack> tracks;
@@ -28,25 +32,67 @@ public class DiskImage {
 	private List<DiskFile> files;
 	private String name;
 	private String id;
+	private boolean useDirTrack;
+	private int fileCount;
+	private boolean ascendingTrackSearch;
+	private int dirSectors;
+
+	/**
+	 * Default constructor
+	 */
+	public DiskImage() {
+	}
 
 	/**
 	 * @param name
 	 * @param id
 	 * @param imageDescriptor
 	 * @param interleave
+	 * @param useDirTrack
 	 */
-	public DiskImage(String name, String id,
-			DiskImageDescriptor imageDescriptor, Integer interleave) {
+	public DiskImage(DiskImage model) {
 		super();
-		this.name = name;
-		this.id = id;
-		this.imageDescriptor = imageDescriptor;
-		this.interleave = interleave;
+		this.name = model.getName();
+		this.id = model.getId();
+		this.imageDescriptor = model.getImageDescriptor();
+		this.interleave = model.getInterleave();
+		this.useDirTrack = model.isUseDirTrack();
+		this.fileCount = model.getFiles() != null ? model.getFiles().size() : 0;
 		this.files = new ArrayList<DiskFile>();
 		this.tracks = new ArrayList<DiskTrack>();
 		for (int t = 1; t <= imageDescriptor.getNumberOfTracks(); t++) {
-			this.tracks.add(new DiskTrack(imageDescriptor
-					.getNumberOfSectorsPerTrack(t)));
+			this.tracks.add(new DiskTrack(imageDescriptor.getNumberOfSectorsPerTrack(t)));
+		}
+		reserveSectorsForBAMAndDir();
+	}
+
+	/**
+	 * Reserve sectors for BAM and Directory
+	 */
+	private void reserveSectorsForBAMAndDir() {
+		for (DiskPointer sector : imageDescriptor.getBamSectors()) {
+			setSector(sector, RESERVED_SECTOR);
+		}
+		if (!useDirTrack) {
+			for (DiskPointer sector : imageDescriptor.getDirectorySectors()) {
+				setSector(sector, RESERVED_SECTOR);
+			}
+		} else {
+			try {
+				int dirEntriesPerSector = DiskSector.SECTOR_SIZE / DIRECTORY_ENTRY_SIZE;
+				this.dirSectors = fileCount / dirEntriesPerSector + (fileCount % dirEntriesPerSector == 0 ? 0 : 1);
+				if (this.dirSectors == 0) {
+					this.dirSectors = 1;
+				}
+				DiskPointer sector = imageDescriptor.getDirectorySectors().get(0);
+				for (int i = 0; i < this.dirSectors; i++) {
+					setSector(sector, RESERVED_SECTOR);
+					sector = getNextAvailableSector(sector, true);
+				}
+
+			} catch (DiskFullException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -57,9 +103,8 @@ public class DiskImage {
 	 * @throws IOException
 	 * @throws CoreException
 	 */
-	public void add(String name, IFile file, DiskFileType type, boolean locked,
-			boolean closed) throws IOException, CoreException,
-			DiskFullException {
+	public void add(String name, IFile file, DiskFileType type, boolean locked, boolean closed)
+			throws IOException, CoreException, DiskFullException {
 
 		DiskFile newFile = new DiskFile(file);
 		newFile.setName(name);
@@ -71,7 +116,7 @@ public class DiskImage {
 		DiskSector prevSector = null;
 
 		for (DiskSector sector : newFile.toDiskSectors()) {
-			currentPointer = getNextAvailableSector(currentPointer);
+			currentPointer = getNextAvailableSector(currentPointer, false);
 			sector.setNextSector(0, sector.getData().length + 1);
 			setSector(currentPointer, sector);
 			if (prevSector != null) {
@@ -90,8 +135,7 @@ public class DiskImage {
 	 * @param sector
 	 */
 	private void setSector(DiskPointer pointer, DiskSector sector) {
-		this.tracks.get(pointer.getTrack() - 1).setSector(pointer.getSector(),
-				sector);
+		this.tracks.get(pointer.getTrack() - 1).setSector(pointer.getSector(), sector);
 	}
 
 	/**
@@ -100,7 +144,7 @@ public class DiskImage {
 	 * @return DiskPointer to the sector
 	 */
 	private DiskPointer getFirstAvailableSector() throws DiskFullException {
-		return getNextAvailableSector(null);
+		return getNextAvailableSector(null, false);
 	}
 
 	/**
@@ -110,33 +154,36 @@ public class DiskImage {
 	 *            the pointer to the last sector used
 	 * @return DiskPointer to the next available sector
 	 */
-	private DiskPointer getNextAvailableSector(DiskPointer lastSector)
-			throws DiskFullException {
+	private DiskPointer getNextAvailableSector(DiskPointer lastSector, boolean allowReserved) throws DiskFullException {
 		DiskPointer bamStart = this.imageDescriptor.getBamSectors().get(0);
-		DiskPointer dirStart = this.imageDescriptor.getDirectorySectors()
-				.get(0);
 
-		// Default values for track and sector: track=BAM track-1, sector=0
-		int trackNumber = bamStart.getTrack() - 1;
-		int sectorNumber = 0;
+		int trackNumber;
+		int sectorNumber;
 		// Use last sectors' data if any
 		if (lastSector != null) {
 			trackNumber = lastSector.getTrack();
 			sectorNumber = lastSector.getSector();
+		} else {
+			// Default values for track and sector: track=BAM track-1, sector=0
+			trackNumber = bamStart.getTrack() - 1;
+			sectorNumber = 0;
 		}
 
 		// Find a track with at least one empty sector
 		DiskTrack track = this.tracks.get(trackNumber - 1);
-		while (track.isFull()) {
+		while (track.isFull(allowReserved)) {
 			// Search for track below the BAM track first by stepping down
-			if (trackNumber < bamStart.getTrack()) {
+			if (!ascendingTrackSearch) {
 				trackNumber--;
 				if (trackNumber < 1) {
-					// Continue above BAM track
-					trackNumber = dirStart.getTrack() + 1;
+					ascendingTrackSearch = true;
+					if (useDirTrack) {
+						trackNumber = bamStart.getTrack();
+					} else {
+						trackNumber = bamStart.getTrack() + 1;
+					}
 				}
 			} else {
-				// Step upwards above BAM track
 				trackNumber++;
 				if (trackNumber > this.imageDescriptor.getNumberOfTracks()) {
 					// No track found with available sector
@@ -151,7 +198,7 @@ public class DiskImage {
 		}
 		DiskSector sector = track.getSector(sectorNumber);
 		int firstSectorInTrack = -1;
-		while (sector != null) {
+		while (sector != null && (sector != RESERVED_SECTOR && allowReserved)) {
 			sectorNumber += getInterleaveValue();
 			if (sectorNumber >= track.getNumberOfSectors()) {
 				sectorNumber = ++firstSectorInTrack;
@@ -170,8 +217,7 @@ public class DiskImage {
 	 * @throws DiskFullException
 	 * @throws CoreException
 	 */
-	public InputStream getImage() throws IOException, DiskFullException,
-			CoreException {
+	public InputStream getImage() throws IOException, DiskFullException, CoreException {
 
 		createDirectory();
 		createBam();
@@ -180,8 +226,7 @@ public class DiskImage {
 
 		for (int t = 1; t <= this.imageDescriptor.getNumberOfTracks(); t++) {
 			DiskTrack track = this.tracks.get(t - 1);
-			for (int s = 0; s < this.imageDescriptor
-					.getNumberOfSectorsPerTrack(t); s++) {
+			for (int s = 0; s < this.imageDescriptor.getNumberOfSectorsPerTrack(t); s++) {
 				DiskSector sector = track.getSector(s);
 				if (sector != null) {
 					baos.write(sector.getNextSector().toByteArray());
@@ -208,18 +253,16 @@ public class DiskImage {
 	private void createDirectory() throws DiskFullException, CoreException {
 		DiskSector sector = new DiskSector();
 		sector.setNextSector(0, 255);
-		DiskPointer dirPointer = this.imageDescriptor.getDirectorySectors()
-				.get(0);
+		DiskPointer dirPointer = this.imageDescriptor.getDirectorySectors().get(0);
 		setSector(dirPointer, sector);
 
-		ByteArrayOutputStream data = new ByteArrayOutputStream(
-				DiskSector.SECTOR_SIZE);
+		ByteArrayOutputStream data = new ByteArrayOutputStream(DiskSector.SECTOR_SIZE);
 
 		for (DiskFile file : this.files) {
 			try {
 				byte[] entry = getDirectoryEntry(file);
 				if (data.size() + entry.length > DiskSector.SECTOR_SIZE) {
-					dirPointer = getNextAvailableSector(dirPointer);
+					dirPointer = getNextAvailableSector(dirPointer, true);
 					sector.setNextSector(dirPointer);
 					sector.setData(data.toByteArray());
 					data.reset();
@@ -249,8 +292,7 @@ public class DiskImage {
 	 * @throws IOException
 	 * @throws CoreException
 	 */
-	private byte[] getDirectoryEntry(DiskFile file) throws IOException,
-			CoreException {
+	private byte[] getDirectoryEntry(DiskFile file) throws IOException, CoreException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(30);
 
 		// File type
@@ -299,8 +341,7 @@ public class DiskImage {
 		sector.setNextSector(this.imageDescriptor.getDirectorySectors().get(0));
 		setSector(bamPointer, sector);
 
-		ByteArrayOutputStream data = new ByteArrayOutputStream(
-				DiskSector.SECTOR_SIZE);
+		ByteArrayOutputStream data = new ByteArrayOutputStream(DiskSector.SECTOR_SIZE);
 
 		addBamHeader(data);
 
@@ -349,14 +390,11 @@ public class DiskImage {
 			stream.write(convertName(this.name));
 			stream.write((char) 0xa0);
 			// Disk ATTRNAME_ID
-			stream.write(StringUtils.toByteArray(StringUtils
-					.convertStringtoPETSCII(this.id, 2, 2, (char) 0xa0)));
+			stream.write(StringUtils.toByteArray(StringUtils.convertStringtoPETSCII(this.id, 2, 2, (char) 0xa0)));
 			stream.write((char) 0xa0);
 			// DOS version
-			stream.write(StringUtils.toByteArray(StringUtils
-					.convertStringtoPETSCII(Integer
-							.toHexString(this.imageDescriptor.getDosVersion()),
-							2, 2, (char) 0xa0)));
+			stream.write(StringUtils.toByteArray(StringUtils.convertStringtoPETSCII(
+					Integer.toHexString(this.imageDescriptor.getDosVersion()), 2, 2, (char) 0xa0)));
 			stream.write((char) 0xa0);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -369,8 +407,7 @@ public class DiskImage {
 	 * @return
 	 */
 	private byte[] convertName(String name) {
-		return StringUtils.toByteArray(StringUtils.convertStringtoPETSCII(name,
-				16, 16, (char) 0xa0));
+		return StringUtils.toByteArray(StringUtils.convertStringtoPETSCII(name, 16, 16, (char) 0xa0));
 	}
 
 	private int getInterleaveValue() {
@@ -455,9 +492,16 @@ public class DiskImage {
 		this.id = id;
 	}
 
+	public boolean isUseDirTrack() {
+		return useDirTrack;
+	}
+
+	public void setUseDirTrack(boolean useDirTrack) {
+		this.useDirTrack = useDirTrack;
+	}
+
 	@Override
 	public String toString() {
-		return "DiskImage [" + imageDescriptor + ", name=" + name + ", id="
-				+ id + "]";
+		return "DiskImage [" + imageDescriptor + ", name=" + name + ", id=" + id + "]";
 	}
 }

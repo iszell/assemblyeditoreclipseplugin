@@ -78,9 +78,9 @@ public class DiskTrack {
 	 * 
 	 * @return true if there are no free sectors
 	 */
-	public boolean isFull() {
+	public boolean isFull(boolean allowReserved) {
 		for (DiskSector sector : this.sectors) {
-			if (sector == null) {
+			if (sector == null || (allowReserved && sector == DiskImage.RESERVED_SECTOR)) {
 				return false;
 			}
 		}
