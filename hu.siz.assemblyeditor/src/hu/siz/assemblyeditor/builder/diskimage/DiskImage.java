@@ -198,7 +198,7 @@ public class DiskImage {
 		}
 		DiskSector sector = track.getSector(sectorNumber);
 		int firstSectorInTrack = -1;
-		while (sector != null && (sector != RESERVED_SECTOR && allowReserved)) {
+		while ((!allowReserved && sector != null) || (allowReserved && sector != RESERVED_SECTOR)) {
 			sectorNumber += getInterleaveValue();
 			if (sectorNumber >= track.getNumberOfSectors()) {
 				sectorNumber = ++firstSectorInTrack;
