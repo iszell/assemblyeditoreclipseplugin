@@ -22,6 +22,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 
 import hu.siz.assemblyeditor.AssemblyEditorPlugin;
 import hu.siz.assemblyeditor.utils.AssemblyUtils;
@@ -81,8 +82,9 @@ public class ResourceDependencies {
 	 * @param dependentResourcePath
 	 *            The full dependent resource path
 	 */
-	public synchronized void add(String resourcePath,
-			String dependentResourcePath) {
+	public synchronized void add(String resourcePath, String dependentResourcePath) {
+		AssemblyUtils.createLogEntry(IStatus.OK,
+				"ResourceDependencies.add(" + resourcePath + ", " + dependentResourcePath + ")");
 		Set<String> dependencies;
 		if (resourceDependencies.containsKey(resourcePath)) {
 			dependencies = resourceDependencies.get(resourcePath);
@@ -108,6 +110,7 @@ public class ResourceDependencies {
 	 * Clean project data from dependency database
 	 */
 	public synchronized void clean(IProject project) {
+		AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.clean()");
 		String projectPath = project.getFullPath().toString() + IPath.SEPARATOR;
 		Map<String, Set<String>> newDependencies = new HashMap<String, Set<String>>();
 
@@ -123,11 +126,10 @@ public class ResourceDependencies {
 	 * Save dependency database
 	 */
 	public synchronized void saveState() {
-		IPath stateLocation = AssemblyEditorPlugin.getDefault()
-				.getStateLocation();
+		AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.saveState()");
+		IPath stateLocation = AssemblyEditorPlugin.getDefault().getStateLocation();
 		try {
-			OutputStream file = new FileOutputStream(stateLocation.append(
-					STATEFILE_NAME).toOSString());
+			OutputStream file = new FileOutputStream(stateLocation.append(STATEFILE_NAME).toOSString());
 			OutputStream buffer = new BufferedOutputStream(file);
 			ObjectOutput output = new ObjectOutputStream(buffer);
 			output.writeObject(resourceDependencies);
@@ -142,15 +144,13 @@ public class ResourceDependencies {
 	 */
 	@SuppressWarnings("unchecked")
 	private static synchronized void restoreState() {
-		IPath stateLocation = AssemblyEditorPlugin.getDefault()
-				.getStateLocation();
+		AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.restoreState()");
+		IPath stateLocation = AssemblyEditorPlugin.getDefault().getStateLocation();
 		try {
-			InputStream file = new FileInputStream(stateLocation.append(
-					STATEFILE_NAME).toOSString());
+			InputStream file = new FileInputStream(stateLocation.append(STATEFILE_NAME).toOSString());
 			InputStream buffer = new BufferedInputStream(file);
 			ObjectInput input = new ObjectInputStream(buffer);
-			resourceDependencies = (Map<String, Set<String>>) input
-					.readObject();
+			resourceDependencies = (Map<String, Set<String>>) input.readObject();
 			input.close();
 		} catch (Exception e) {
 			AssemblyUtils.createLogEntry(e);

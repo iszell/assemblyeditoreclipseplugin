@@ -59,8 +59,6 @@
     	</sequence>
     </complexType>
 
-
-
     <complexType name="FilesType">
     	<sequence>
     		<element name="file" type="dis:FileType" maxOccurs="unbounded" minOccurs="0"></element>
