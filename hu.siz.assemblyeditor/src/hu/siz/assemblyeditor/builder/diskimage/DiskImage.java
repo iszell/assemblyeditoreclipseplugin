@@ -198,7 +198,7 @@ public class DiskImage {
 		}
 		DiskSector sector = track.getSector(sectorNumber);
 		int firstSectorInTrack = -1;
-		while ((!allowReserved && sector != null) || (allowReserved && sector != RESERVED_SECTOR)) {
+		while (isBAM(trackNumber, sectorNumber) || (!allowReserved && sector != null) || (allowReserved && sector != RESERVED_SECTOR)) {
 			sectorNumber += getInterleaveValue();
 			if (sectorNumber >= track.getNumberOfSectors()) {
 				sectorNumber = ++firstSectorInTrack;
@@ -207,6 +207,15 @@ public class DiskImage {
 		}
 
 		return new DiskPointer(trackNumber, sectorNumber);
+	}
+	
+	private boolean isBAM(int track, int sector) {
+		for(DiskPointer ptr : this.imageDescriptor.getBamSectors()) {
+			if(ptr.getTrack() == track && ptr.getSector() == sector ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -268,7 +277,6 @@ public class DiskImage {
 					data.reset();
 
 					sector = new DiskSector();
-					sector.setNextSector(0, 255);
 					setSector(dirPointer, sector);
 				}
 				if (data.size() != 0) {
@@ -280,6 +288,7 @@ public class DiskImage {
 				AssemblyUtils.createLogEntry(e);
 			}
 		}
+		sector.setNextSector(0, data.size());
 		sector.setData(data.toByteArray());
 	}
 
