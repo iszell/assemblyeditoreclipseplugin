@@ -22,7 +22,6 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
 
 import hu.siz.assemblyeditor.AssemblyEditorPlugin;
 import hu.siz.assemblyeditor.utils.AssemblyUtils;
@@ -83,8 +82,8 @@ public class ResourceDependencies {
 	 *            The full dependent resource path
 	 */
 	public synchronized void add(String resourcePath, String dependentResourcePath) {
-		AssemblyUtils.createLogEntry(IStatus.OK,
-				"ResourceDependencies.add(" + resourcePath + ", " + dependentResourcePath + ")");
+//		AssemblyUtils.createLogEntry(IStatus.OK,
+//				"ResourceDependencies.add(" + resourcePath + ", " + dependentResourcePath + ")");
 		Set<String> dependencies;
 		if (resourceDependencies.containsKey(resourcePath)) {
 			dependencies = resourceDependencies.get(resourcePath);
@@ -110,7 +109,7 @@ public class ResourceDependencies {
 	 * Clean project data from dependency database
 	 */
 	public synchronized void clean(IProject project) {
-		AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.clean()");
+//		AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.clean()");
 		String projectPath = project.getFullPath().toString() + IPath.SEPARATOR;
 		Map<String, Set<String>> newDependencies = new HashMap<String, Set<String>>();
 
@@ -126,7 +125,7 @@ public class ResourceDependencies {
 	 * Save dependency database
 	 */
 	public synchronized void saveState() {
-		AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.saveState()");
+//		AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.saveState()");
 		IPath stateLocation = AssemblyEditorPlugin.getDefault().getStateLocation();
 		try {
 			OutputStream file = new FileOutputStream(stateLocation.append(STATEFILE_NAME).toOSString());
@@ -144,7 +143,7 @@ public class ResourceDependencies {
 	 */
 	@SuppressWarnings("unchecked")
 	private static synchronized void restoreState() {
-		AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.restoreState()");
+//		AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.restoreState()");
 		IPath stateLocation = AssemblyEditorPlugin.getDefault().getStateLocation();
 		try {
 			InputStream file = new FileInputStream(stateLocation.append(STATEFILE_NAME).toOSString());
