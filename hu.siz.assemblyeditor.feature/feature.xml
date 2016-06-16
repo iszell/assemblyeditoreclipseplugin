@@ -2,7 +2,7 @@
 <feature
       id="hu.siz.assemblyeditor.feature"
       label="8bit CrossAssembly Development"
-      version="0.3.1"
+      version="0.3.2"
       provider-name="Siz">
 
    <description url="http://siz.no-ip.info">

@@ -18,6 +18,9 @@
    <feature url="features/hu.siz.assemblyeditor.feature_0.3.1.jar" id="hu.siz.assemblyeditor.feature" version="0.3.1">
       <category name="CBM"/>
    </feature>
+   <feature url="features/hu.siz.assemblyeditor.feature_0.3.2.jar" id="hu.siz.assemblyeditor.feature" version="0.3.2">
+      <category name="CBM"/>
+   </feature>
    <category-def name="CBM" label="Commodore cross development">
       <description>
          Tools for development for the ancient 8 bit Commodore (and other 65xx) based systems.
