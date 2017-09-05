@@ -1,8 +1,6 @@
 package hu.siz.assemblyeditor.views;
 
 
-import hu.siz.assemblyeditor.Messages;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -19,7 +17,7 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -29,6 +27,8 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+
+import hu.siz.assemblyeditor.Messages;
 
 
 /**
@@ -94,7 +94,7 @@ public class AssembyView extends ViewPart {
 					getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
 		}
 	}
-	class NameSorter extends ViewerSorter {
+	class NameComparator extends ViewerComparator {
 		//TODO NameSorter
 	}
 
@@ -114,7 +114,7 @@ public class AssembyView extends ViewPart {
 		this.viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		this.viewer.setContentProvider(new ViewContentProvider());
 		this.viewer.setLabelProvider(new ViewLabelProvider());
-		this.viewer.setSorter(new NameSorter());
+		this.viewer.setComparator(new NameComparator());
 		this.viewer.setInput(getViewSite());
 		makeActions();
 		hookContextMenu();
