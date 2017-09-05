@@ -1,11 +1,7 @@
 package hu.siz.assemblyeditor.builder;
 
-import hu.siz.assemblyeditor.AssemblyEditorPlugin;
-import hu.siz.assemblyeditor.Messages;
-import hu.siz.assemblyeditor.preferences.PreferenceConstants;
-import hu.siz.assemblyeditor.properties.PropertyStore;
-import hu.siz.assemblyeditor.utils.AssemblyUtils;
-
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,12 +17,24 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import hu.siz.assemblyeditor.AssemblyEditorPlugin;
+import hu.siz.assemblyeditor.Messages;
+import hu.siz.assemblyeditor.preferences.PreferenceConstants;
+import hu.siz.assemblyeditor.properties.PropertyStore;
+import hu.siz.assemblyeditor.utils.AssemblyUtils;
+
 public class AssemblyBuilder extends IncrementalProjectBuilder {
 
 	private static final String EXT_ASM = "asm"; //$NON-NLS-1$
 	private static final String EXT_DIS = "dis"; //$NON-NLS-1$
 	private static final String EXT_INC = "inc"; //$NON-NLS-1$
 	private static final String EXT_MDC = "mdc"; //$NON-NLS-1$
+
+	private static final String CUSTOMPREFIX = ";#$"; //$NON-NLS-1$
+	private static final String PREFIX_COMPILER = CUSTOMPREFIX + "compiler="; //$NON-NLS-1$
+	private static final String PREFIX_COMPILEROPTIONS = CUSTOMPREFIX + "compilerOptions="; //$NON-NLS-1$
+	private static final String PREFIX_POSTPROCESSOR = CUSTOMPREFIX + "postProcessor="; //$NON-NLS-1$
+	private static final String PREFIX_POSTPROCESSOROPTIONS = CUSTOMPREFIX + "postProcessorOptions="; //$NON-NLS-1$
 
 	class AssemblyDeltaVisitor implements IResourceDeltaVisitor {
 
@@ -189,25 +197,26 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 					AssemblyEditorPlugin.PLUGIN_ID);
 
 			String ext = resource.getFileExtension();
+			String[] customSettings = getCustomCompileOptions(resource);
 			if (EXT_ASM.equals(ext) || EXT_INC.equals(ext)) {
-				String compilername = store.getString(PreferenceConstants.P_COMPILER);
+				String compilername = customSettings[0] != null ? customSettings[0]
+						: store.getString(PreferenceConstants.P_COMPILER);
 
-				if (compilername.equals(PreferenceConstants.P_COMPILER_64TASS)) {
+				if (compilername.equalsIgnoreCase(PreferenceConstants.P_COMPILER_64TASS)) {
 					compiler = new TAssCompiler();
-				} else if (compilername.equals(PreferenceConstants.P_COMPILER_AS65)) {
+				} else if (compilername.equalsIgnoreCase(PreferenceConstants.P_COMPILER_AS65)) {
 					compiler = new As65Compiler();
-				} else if (compilername.equals(PreferenceConstants.P_COMPILER_CA65)) {
+				} else if (compilername.equalsIgnoreCase(PreferenceConstants.P_COMPILER_CA65)) {
 					compiler = new CA65Compiler();
-				} else if (compilername.equals(PreferenceConstants.P_COMPILER_DASM)) {
+				} else if (compilername.equalsIgnoreCase(PreferenceConstants.P_COMPILER_DASM)) {
 					compiler = new DAsmCompiler();
-				} else if (compilername.equals(PreferenceConstants.P_COMPILER_SNAsm)) {
+				} else if (compilername.equalsIgnoreCase(PreferenceConstants.P_COMPILER_SNAsm)) {
 					compiler = new SNAsmCompiler();
-				} else if (compilername.equals(PreferenceConstants.P_COMPILER_TMPX)) {
+				} else if (compilername.equalsIgnoreCase(PreferenceConstants.P_COMPILER_TMPX)) {
 					compiler = new TMPxCompiler();
-				} else if (compilername.equals(PreferenceConstants.P_COMPILER_XA)) {
+				} else if (compilername.equalsIgnoreCase(PreferenceConstants.P_COMPILER_XA)) {
 					compiler = new XACompiler();
 				}
-
 			} else if (EXT_MDC.equals(ext)) {
 				compiler = new MakeDiskCompiler();
 			} else if (EXT_DIS.equals(ext)) {
@@ -216,13 +225,15 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 
 			if (compiler != null) {
 				if (!EXT_INC.equals(ext)) {
-					compiler.compile(resource, new AssemblyErrorHandler(), monitor, store);
-					String postProcessor = store.getString(PreferenceConstants.P_POSTPROCESSORPATH);
+					compiler.compile(resource, new AssemblyErrorHandler(), monitor, store, null, customSettings[1]);
+					String postProcessor = customSettings[3] != null ? customSettings[2]
+							: store.getString(PreferenceConstants.P_POSTPROCESSORPATH);
 					if (postProcessor != null && postProcessor.length() != 0) {
-						IResource prg = resource.getParent()
-								.findMember(resource.getFullPath().removeFileExtension().addFileExtension("prg").lastSegment());
+						IResource prg = resource.getParent().findMember(
+								resource.getFullPath().removeFileExtension().addFileExtension("prg").lastSegment());
 						if (prg != null) {
-							new PostProcessorCompiler().compile(prg, new AssemblyErrorHandler(), monitor, store);
+							new PostProcessorCompiler().compile(prg, new AssemblyErrorHandler(), monitor, store,
+									customSettings[2], customSettings[3]);
 						}
 					}
 				}
@@ -247,6 +258,31 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 				}
 			}
 		}
+	}
+
+	private String[] getCustomCompileOptions(IResource resource) {
+		String[] result = new String[4];
+		try {
+			IFile file = resource.getWorkspace().getRoot().getFile(resource.getFullPath());
+
+			String currentLine = null;
+			BufferedReader in = null;
+			in = new BufferedReader(new InputStreamReader(file.getContents()));
+			while ((currentLine = in.readLine()) != null) {
+				if (currentLine.startsWith(PREFIX_COMPILER)) {
+					result[0] = currentLine.substring(PREFIX_COMPILER.length());
+				} else if (currentLine.startsWith(PREFIX_COMPILEROPTIONS)) {
+					result[1] = currentLine.substring(PREFIX_COMPILEROPTIONS.length());
+				} else if (currentLine.startsWith(PREFIX_POSTPROCESSOR)) {
+					result[2] = currentLine.substring(PREFIX_POSTPROCESSOR.length());
+				} else if (currentLine.startsWith(PREFIX_POSTPROCESSOROPTIONS)) {
+					result[3] = currentLine.substring(PREFIX_POSTPROCESSOROPTIONS.length());
+				}
+			}
+		} catch (Exception e) {
+			AssemblyUtils.createLogEntry(e);
+		}
+		return result;
 	}
 
 	private void cleanResource(IResource resource, IProgressMonitor monitor) {

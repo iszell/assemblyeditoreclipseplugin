@@ -33,13 +33,16 @@ public class PostProcessorCompiler extends AssemblyCompiler {
 	}
 
 	@Override
-	protected void createCompileCommand(IProgressMonitor monitor) {
-		this.compileCommand.append(this.store.getString(PreferenceConstants.P_POSTPROCESSORPATH));
+	protected void createCompileCommand(IProgressMonitor monitor, String customCompiler, String customOptions) {
+		String command = customCompiler != null ? customCompiler
+				: this.store.getString(PreferenceConstants.P_POSTPROCESSORPATH);
+		this.compileCommand.append(command);
 
 		if (this.compileCommand.length() != 0) {
 			oldPath = this.resource.getFullPath();
 			newPath = oldPath.removeFileExtension().addFileExtension("PostProcessorTemp");
-			String commandLine = this.store.getString(PreferenceConstants.P_POSTPROCESSCMDLINE);
+			String commandLine = customOptions != null ? customOptions
+					: this.store.getString(PreferenceConstants.P_POSTPROCESSCMDLINE);
 			commandLine = commandLine.replace("&i", newPath.lastSegment());
 			commandLine = commandLine.replace("&o", oldPath.lastSegment());
 			this.compileCommand.append(' ');

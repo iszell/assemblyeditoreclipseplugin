@@ -36,7 +36,7 @@ public class DiskImageBuilder implements ICompiler {
 	 */
 	@Override
 	public void compile(IResource resource, AssemblyErrorHandler handler, IProgressMonitor monitor,
-			IPreferenceStore preferenceStore) {
+			IPreferenceStore preferenceStore, String customCompiler, String customOptions) {
 		if (resource instanceof IFile) {
 			IFile file = (IFile) resource;
 			DiskImage model = DiskImageModelHandler.loadModel(file);

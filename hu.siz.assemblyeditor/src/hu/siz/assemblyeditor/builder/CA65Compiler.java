@@ -26,7 +26,7 @@ public class CA65Compiler extends AssemblyCompiler {
 	 * hu.siz.assemblyeditor.builder.AssemblyCompiler#createCompileCommand()
 	 */
 	@Override
-	protected void createCompileCommand(IProgressMonitor monitor) {
+	protected void createCompileCommand(IProgressMonitor monitor, String customCompiler, String customOptions) {
 		this.compileCommand.append(this.store
 				.getString(PreferenceConstants.P_CA65PATH));
 		this.compileCommand.append(this.store

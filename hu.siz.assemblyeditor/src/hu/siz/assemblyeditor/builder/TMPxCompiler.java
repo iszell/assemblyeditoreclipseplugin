@@ -27,7 +27,7 @@ public class TMPxCompiler extends AssemblyCompiler {
 	}
 
 	@Override
-	protected void createCompileCommand(IProgressMonitor monitor) {
+	protected void createCompileCommand(IProgressMonitor monitor, String customCompiler, String customOptions) {
 
 		this.compileCommand.append(this.store
 				.getString(PreferenceConstants.P_TMPXPATH));

@@ -82,8 +82,12 @@ public abstract class AssemblyCompiler implements ICompiler {
 	 * 
 	 * @param monitor
 	 *            the progress monitor instance to track progress
+	 * @param customCompiler
+	 *            TODO
+	 * @param customOptions
+	 *            TODO
 	 */
-	protected abstract void createCompileCommand(IProgressMonitor monitor);
+	protected abstract void createCompileCommand(IProgressMonitor monitor, String customCompiler, String customOptions);
 
 	/**
 	 * Initialize the compiler
@@ -208,19 +212,19 @@ public abstract class AssemblyCompiler implements ICompiler {
 	 */
 	@Override
 	public void compile(IResource resource, AssemblyErrorHandler handler, IProgressMonitor monitor,
-			IPreferenceStore preferenceStore) {
+			IPreferenceStore preferenceStore, String customCompiler, String customOptions) {
 		this.resource = resource;
 		this.handler = handler;
 		this.store = preferenceStore;
 
 		this.compileCommand = new StringBuilder();
 
-		createCompileCommand(monitor);
+		createCompileCommand(monitor, customCompiler, customOptions);
 
 		if (this.compileCommand.length() != 0) {
 			try {
 				init(monitor);
-				
+
 				this.process = Runtime.getRuntime().exec(this.compileCommand.toString(), null,
 						resource.getParent().getLocation().toFile());
 

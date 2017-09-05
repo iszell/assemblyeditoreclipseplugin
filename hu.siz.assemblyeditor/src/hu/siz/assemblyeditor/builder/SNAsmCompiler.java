@@ -18,7 +18,7 @@ public class SNAsmCompiler extends AssemblyCompiler {
 	 * @see hu.siz.assemblyeditor.builder.AssemblyCompiler#createCompileCommand()
 	 */
 	@Override
-	protected void createCompileCommand(IProgressMonitor monitor) {
+	protected void createCompileCommand(IProgressMonitor monitor, String customCompiler, String customOptions) {
 		// TODO Auto-generated method stub
 
 	}

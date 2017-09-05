@@ -20,12 +20,11 @@ public interface ICompiler {
 	/**
 	 * Compile one resource
 	 */
-	public void compile(IResource resource, AssemblyErrorHandler handler,
-			IProgressMonitor monitor, IPreferenceStore preferenceStore);
+	public void compile(IResource resource, AssemblyErrorHandler handler, IProgressMonitor monitor,
+			IPreferenceStore preferenceStore, String customCompiler, String customOptions);
 
 	/**
 	 * Get dependency resource names
 	 */
-	public Set<String> getDependencies(IResource resource,
-			IProgressMonitor monitor);
+	public Set<String> getDependencies(IResource resource, IProgressMonitor monitor);
 }

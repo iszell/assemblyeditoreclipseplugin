@@ -28,26 +28,27 @@ public class TAssCompiler extends AssemblyCompiler {
 	}
 
 	@Override
-	protected void createCompileCommand(IProgressMonitor monitor) {
+	protected void createCompileCommand(IProgressMonitor monitor, String customCompiler, String customOptions) {
 
-		this.compileCommand.append(this.store
-				.getString(PreferenceConstants.P_TASSPATH));
+		this.compileCommand.append(this.store.getString(PreferenceConstants.P_TASSPATH));
 
 		if (this.compileCommand.length() != 0) {
 
+			if (customOptions != null) {
+				this.compileCommand.append(' ');
+				this.compileCommand.append(customOptions);
+			}
+
 			// append other options
 			this.compileCommand.append(" "); //$NON-NLS-1$
-			this.compileCommand.append(this.store
-					.getString(PreferenceConstants.P_TASSCMDLINE));
+			this.compileCommand.append(this.store.getString(PreferenceConstants.P_TASSCMDLINE));
 
 			// append architecture
 			this.compileCommand.append(" "); //$NON-NLS-1$
-			this.compileCommand.append(this.store
-					.getString(PreferenceConstants.P_TASSOPTARCHITECTURE));
+			this.compileCommand.append(this.store.getString(PreferenceConstants.P_TASSOPTARCHITECTURE));
 
 			// append case sensitive compilation
-			if (this.store
-					.getBoolean(PreferenceConstants.P_TASSOPTCASESENSITIVE)) {
+			if (this.store.getBoolean(PreferenceConstants.P_TASSOPTCASESENSITIVE)) {
 				this.compileCommand.append(" --case-sensitive"); //$NON-NLS-1$
 			}
 
@@ -74,26 +75,21 @@ public class TAssCompiler extends AssemblyCompiler {
 			// append destinations name
 			this.compileCommand.append(" -o "); //$NON-NLS-1$
 			this.compileCommand
-					.append(this.resource.getLocation().removeFileExtension()
-							.addFileExtension("prg").toOSString()); //$NON-NLS-1$
+					.append(this.resource.getLocation().removeFileExtension().addFileExtension("prg").toOSString()); //$NON-NLS-1$
 
 			// append listing file name
-			if (this.store
-					.getBoolean(PreferenceConstants.P_TASSOPTCREATELISTING)) {
+			if (this.store.getBoolean(PreferenceConstants.P_TASSOPTCREATELISTING)) {
 				this.compileCommand.append(" -L "); //$NON-NLS-1$
-				this.compileCommand.append(this.resource.getLocation()
-						.removeFileExtension()
-						.addFileExtension("lst").toOSString()); //$NON-NLS-1$
+				this.compileCommand
+						.append(this.resource.getLocation().removeFileExtension().addFileExtension("lst").toOSString()); //$NON-NLS-1$
 				this.hasListing = true;
 			}
 
 			// append label file name
-			if (this.store
-					.getBoolean(PreferenceConstants.P_TASSOPTCREATELABELS)) {
+			if (this.store.getBoolean(PreferenceConstants.P_TASSOPTCREATELABELS)) {
 				this.compileCommand.append(" -l "); //$NON-NLS-1$
-				this.compileCommand.append(this.resource.getLocation()
-						.removeFileExtension()
-						.addFileExtension("lbl").toOSString()); //$NON-NLS-1$
+				this.compileCommand
+						.append(this.resource.getLocation().removeFileExtension().addFileExtension("lbl").toOSString()); //$NON-NLS-1$
 				this.hasLabels = true;
 			}
 
@@ -118,8 +114,7 @@ public class TAssCompiler extends AssemblyCompiler {
 		final Integer i_serverity;
 		final int i_message;
 
-		if ("new".equals(this.store
-				.getString(PreferenceConstants.P_TASSVERSION))) {
+		if ("new".equals(this.store.getString(PreferenceConstants.P_TASSVERSION))) {
 			/*
 			 * Ignore lines with less than 5 parts (1: filename, 2: line number,
 			 * 3: column, 4: severity, 5+: message)
@@ -140,10 +135,8 @@ public class TAssCompiler extends AssemblyCompiler {
 		if (parts.length > i_message) {
 			final String filename = parts[i_filename].trim();
 			final Integer lineNumber = Integer.parseInt(parts[i_lineNumber]);
-			final Integer column = i_column == null ? null : Integer
-					.parseInt(parts[i_column]);
-			final String severity = i_serverity == null ? "error"
-					: parts[i_serverity].trim();
+			final Integer column = i_column == null ? null : Integer.parseInt(parts[i_column]);
+			final String severity = i_serverity == null ? "error" : parts[i_serverity].trim();
 			final StringBuilder sb = new StringBuilder();
 			for (int i = i_message; i < parts.length; i++) {
 				if (sb.length() != 0) {
@@ -152,17 +145,13 @@ public class TAssCompiler extends AssemblyCompiler {
 				sb.append(parts[i]);
 			}
 			final String message = sb.toString().trim();
-			final IResource res = this.resource.getProject().findMember(
-					this.resource.getProjectRelativePath()
-							.removeLastSegments(1).append(filename));
+			final IResource res = this.resource.getProject()
+					.findMember(this.resource.getProjectRelativePath().removeLastSegments(1).append(filename));
 			if (res != null) {
 				if ("warning".equals(severity)) {
-					this.handler.addWarning(res, message, lineNumber, column,
-							null);
-				} else if ("error".equals(severity)
-						|| "fatal error".equals(severity)) {
-					this.handler.addError(res, message, lineNumber, column,
-							null);
+					this.handler.addWarning(res, message, lineNumber, column, null);
+				} else if ("error".equals(severity) || "fatal error".equals(severity)) {
+					this.handler.addError(res, message, lineNumber, column, null);
 				}
 			}
 		}
@@ -188,15 +177,12 @@ public class TAssCompiler extends AssemblyCompiler {
 	@Override
 	protected Set<String> getDerivedResourceNames(IResource resource) {
 		Set<String> names = new HashSet<String>();
-		names.add(resource.getLocation().removeFileExtension()
-				.addFileExtension("prg").toFile().getName()); //$NON-NLS-1$
+		names.add(resource.getLocation().removeFileExtension().addFileExtension("prg").toFile().getName()); //$NON-NLS-1$
 		if (this.hasListing) {
-			names.add(resource.getLocation().removeFileExtension()
-					.addFileExtension("lst").toFile().getName()); //$NON-NLS-1$
+			names.add(resource.getLocation().removeFileExtension().addFileExtension("lst").toFile().getName()); //$NON-NLS-1$
 		}
 		if (this.hasLabels) {
-			names.add(resource.getLocation().removeFileExtension()
-					.addFileExtension("lbl").toFile().getName()); //$NON-NLS-1$
+			names.add(resource.getLocation().removeFileExtension().addFileExtension("lbl").toFile().getName()); //$NON-NLS-1$
 		}
 
 		return names;
@@ -214,10 +200,8 @@ public class TAssCompiler extends AssemblyCompiler {
 		String name = null;
 
 		if (line.contains(".include") || line.contains(".binary")) { //$NON-NLS-1$ //$NON-NLS-2$
-			name = line.substring(
-					line.indexOf(STRING_SEPARATOR) + 1,
-					line.indexOf(STRING_SEPARATOR,
-							line.indexOf(STRING_SEPARATOR) + 1));
+			name = line.substring(line.indexOf(STRING_SEPARATOR) + 1,
+					line.indexOf(STRING_SEPARATOR, line.indexOf(STRING_SEPARATOR) + 1));
 		}
 
 		return name;
