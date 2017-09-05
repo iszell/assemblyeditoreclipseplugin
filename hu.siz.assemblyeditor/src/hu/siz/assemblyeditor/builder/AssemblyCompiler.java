@@ -224,8 +224,10 @@ public abstract class AssemblyCompiler implements ICompiler {
 		if (this.compileCommand.length() != 0) {
 			try {
 				init(monitor);
+				
+				final String shell = File.separatorChar == '\\' ? "cmd /c " : "";
 
-				this.process = Runtime.getRuntime().exec(this.compileCommand.toString(), null,
+				this.process = Runtime.getRuntime().exec(shell + this.compileCommand.toString(), null,
 						resource.getParent().getLocation().toFile());
 
 				new Thread(new ConsoleOutputProcessor(MODE_STDOUT)).start();
