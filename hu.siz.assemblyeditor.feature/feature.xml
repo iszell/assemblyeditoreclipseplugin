@@ -2,7 +2,7 @@
 <feature
       id="hu.siz.assemblyeditor.feature"
       label="8bit CrossAssembly Development"
-      version="0.3.2"
+      version="0.4.0"
       provider-name="Siz">
 
    <description url="http://siz.no-ip.info">
@@ -11,10 +11,8 @@ development to Commodore 8 bit platforms.
 It can use various cross assemblers and utilities.
 Current known problems and to do list:
 --------------------------------------
-FIXME Change full refresh to add derived resources
 FIXME Check for unsaved sources before conversion
 TODO Add all opcodes to source scanner
-TODO Implement assembly compilers other than TAss
 TODO Implement marker tooltips in Editor
 TODO Implement possible resource compilations other than assembly
 and D64 image
