@@ -226,7 +226,7 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 			if (compiler != null) {
 				if (!EXT_INC.equals(ext)) {
 					compiler.compile(resource, new AssemblyErrorHandler(), monitor, store, null, customSettings[1]);
-					String postProcessor = customSettings[3] != null ? customSettings[2]
+					String postProcessor = customSettings[2] != null ? customSettings[2]
 							: store.getString(PreferenceConstants.P_POSTPROCESSORPATH);
 					if (postProcessor != null && postProcessor.length() != 0) {
 						IResource prg = resource.getParent().findMember(
