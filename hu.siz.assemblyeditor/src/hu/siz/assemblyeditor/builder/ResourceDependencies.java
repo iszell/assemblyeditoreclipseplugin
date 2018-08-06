@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -33,14 +35,13 @@ import hu.siz.assemblyeditor.utils.AssemblyUtils;
 public class ResourceDependencies {
 
 	private static final String STATEFILE_NAME = "ResourceDependency.dat"; //$NON-NLS-1$
-	private static Map<String, Set<String>> resourceDependencies;
+	private static final Map<String, Set<String>> resourceDependencies = new HashMap<>();
+	private Lock lock = new ReentrantLock();
 	private static ResourceDependencies instance;
 
-	public ResourceDependencies() {
+	private ResourceDependencies() {
 		instance = this;
-		if (resourceDependencies == null) {
-			restoreState();
-		}
+		restoreState();
 	}
 
 	/**
@@ -59,8 +60,14 @@ public class ResourceDependencies {
 	 * @param resourcePath
 	 *            the full resource path
 	 */
-	public synchronized Set<String> get(String resourcePath) {
-		return resourceDependencies.get(resourcePath);
+	public Set<String> get(String resourcePath) {
+		lock.lock();
+		try {
+			final Set<String> result = resourceDependencies.get(resourcePath);
+			return result;
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	/**
@@ -69,7 +76,7 @@ public class ResourceDependencies {
 	 * @param resource
 	 *            the resource
 	 */
-	public synchronized Set<String> get(IResource resource) {
+	public Set<String> get(IResource resource) {
 		return get(resource.getFullPath().toString());
 	}
 
@@ -81,53 +88,66 @@ public class ResourceDependencies {
 	 * @param dependentResourcePath
 	 *            The full dependent resource path
 	 */
-	public synchronized void add(String resourcePath, String dependentResourcePath) {
-//		AssemblyUtils.createLogEntry(IStatus.OK,
-//				"ResourceDependencies.add(" + resourcePath + ", " + dependentResourcePath + ")");
-		Set<String> dependencies;
-		if (resourceDependencies.containsKey(resourcePath)) {
-			dependencies = resourceDependencies.get(resourcePath);
-			if (!dependencies.contains(dependentResourcePath)) {
-				dependencies.add(dependentResourcePath);
+	public void add(String resourcePath, String dependentResourcePath) {
+		// AssemblyUtils.createLogEntry(IStatus.OK,
+		// "ResourceDependencies.add(" + resourcePath + ", " + dependentResourcePath +
+		// ")");
+		lock.lock();
+		try {
+			Set<String> dependencies = resourceDependencies.get(resourcePath);
+			if (dependencies == null) {
+				dependencies = new HashSet<>();
+				resourceDependencies.put(resourcePath, dependencies);
 			}
-		} else {
-			dependencies = new HashSet<String>();
 			dependencies.add(dependentResourcePath);
+			saveState();
+		} finally {
+			lock.unlock();
 		}
-		resourceDependencies.put(resourcePath, dependencies);
-		saveState();
 	}
 
 	/**
 	 * Clean dependency database
 	 */
 	public synchronized void clean() {
-		resourceDependencies.clear();
+		lock.lock();
+		try {
+			resourceDependencies.clear();
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	/**
 	 * Clean project data from dependency database
 	 */
 	public synchronized void clean(IProject project) {
-//		AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.clean()");
-		String projectPath = project.getFullPath().toString() + IPath.SEPARATOR;
-		Map<String, Set<String>> newDependencies = new HashMap<String, Set<String>>();
+		// AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.clean()");
+		lock.lock();
+		try {
+			String projectPath = project.getFullPath().toString() + IPath.SEPARATOR;
+			Map<String, Set<String>> oldDependencies = new HashMap<String, Set<String>>();
+			oldDependencies.putAll(resourceDependencies);
+			clean();
 
-		for (Entry<String, Set<String>> entry : resourceDependencies.entrySet()) {
-			if (!entry.getKey().startsWith(projectPath)) {
-				newDependencies.put(entry.getKey(), entry.getValue());
+			for (Entry<String, Set<String>> entry : oldDependencies.entrySet()) {
+				if (!entry.getKey().startsWith(projectPath)) {
+					resourceDependencies.put(entry.getKey(), entry.getValue());
+				}
 			}
+		} finally {
+			lock.unlock();
 		}
-		resourceDependencies = newDependencies;
 	}
 
 	/**
 	 * Save dependency database
 	 */
-	public synchronized void saveState() {
-//		AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.saveState()");
-		IPath stateLocation = AssemblyEditorPlugin.getDefault().getStateLocation();
+	public void saveState() {
+		// AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.saveState()");
+		lock.lock();
 		try {
+			IPath stateLocation = AssemblyEditorPlugin.getDefault().getStateLocation();
 			OutputStream file = new FileOutputStream(stateLocation.append(STATEFILE_NAME).toOSString());
 			OutputStream buffer = new BufferedOutputStream(file);
 			ObjectOutput output = new ObjectOutputStream(buffer);
@@ -135,6 +155,8 @@ public class ResourceDependencies {
 			output.close();
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			lock.unlock();
 		}
 	}
 
@@ -142,18 +164,23 @@ public class ResourceDependencies {
 	 * Restore dependency database
 	 */
 	@SuppressWarnings("unchecked")
-	private static synchronized void restoreState() {
-//		AssemblyUtils.createLogEntry(IStatus.OK, "ResourceDependencies.restoreState()");
-		IPath stateLocation = AssemblyEditorPlugin.getDefault().getStateLocation();
+	private void restoreState() {
+		// AssemblyUtils.createLogEntry(IStatus.OK,
+		// "ResourceDependencies.restoreState()");
+		lock.lock();
 		try {
+			clean();
+			IPath stateLocation = AssemblyEditorPlugin.getDefault().getStateLocation();
 			InputStream file = new FileInputStream(stateLocation.append(STATEFILE_NAME).toOSString());
 			InputStream buffer = new BufferedInputStream(file);
 			ObjectInput input = new ObjectInputStream(buffer);
-			resourceDependencies = (Map<String, Set<String>>) input.readObject();
+			resourceDependencies.putAll((Map<String, Set<String>>) input.readObject());
 			input.close();
 		} catch (Exception e) {
 			AssemblyUtils.createLogEntry(e);
-			resourceDependencies = new HashMap<String, Set<String>>();
+			clean();
+		} finally {
+			lock.unlock();
 		}
 	}
 }
