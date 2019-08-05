@@ -74,28 +74,36 @@ public class TAssCompiler extends AssemblyCompiler {
 
 			// append destinations name
 			this.compileCommand.append(" -o "); //$NON-NLS-1$
+			this.compileCommand.append('"');
 			this.compileCommand
 					.append(this.resource.getLocation().removeFileExtension().addFileExtension("prg").toOSString()); //$NON-NLS-1$
+			this.compileCommand.append('"');
 
 			// append listing file name
 			if (this.store.getBoolean(PreferenceConstants.P_TASSOPTCREATELISTING)) {
 				this.compileCommand.append(" -L "); //$NON-NLS-1$
+				this.compileCommand.append('"');
 				this.compileCommand
 						.append(this.resource.getLocation().removeFileExtension().addFileExtension("lst").toOSString()); //$NON-NLS-1$
+				this.compileCommand.append('"');
 				this.hasListing = true;
 			}
 
 			// append label file name
 			if (this.store.getBoolean(PreferenceConstants.P_TASSOPTCREATELABELS)) {
 				this.compileCommand.append(" -l "); //$NON-NLS-1$
+				this.compileCommand.append('"');
 				this.compileCommand
 						.append(this.resource.getLocation().removeFileExtension().addFileExtension("lbl").toOSString()); //$NON-NLS-1$
+				this.compileCommand.append('"');
 				this.hasLabels = true;
 			}
 
 			// append source name
 			this.compileCommand.append(" -i "); //$NON-NLS-1$
+			this.compileCommand.append('"');
 			this.compileCommand.append(this.resource.getName().toString());
+			this.compileCommand.append('"');
 		}
 	}
 
@@ -107,6 +115,7 @@ public class TAssCompiler extends AssemblyCompiler {
 	 */
 	@Override
 	protected void processErrorLine(String line) {
+		System.err.println(line);
 		final String[] parts = line.split(":");
 		final int i_filename;
 		final int i_lineNumber;
@@ -165,6 +174,7 @@ public class TAssCompiler extends AssemblyCompiler {
 	 */
 	@Override
 	protected void processInputLine(String line) {
+		System.out.println(line);
 		// Ignore messages on stdin
 	}
 
