@@ -53,8 +53,7 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * org.eclipse.core.resources.IResourceDeltaVisitor#visit(org.eclipse
+		 * @see org.eclipse.core.resources.IResourceDeltaVisitor#visit(org.eclipse
 		 * .core.resources.IResourceDelta)
 		 */
 		@Override
@@ -90,8 +89,8 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 		 * @param IProgressMonitor
 		 *            monitor - progress monitor for process
 		 * @param boolean
-		 *            mode - MODE_CLEAN - project is cleaned; MODE_BUILD -
-		 *            project is built
+		 *            mode - MODE_CLEAN - project is cleaned; MODE_BUILD - project is
+		 *            built
 		 */
 		public AssemblyResourceVisitor(IProgressMonitor monitor, boolean mode) {
 			super();
@@ -198,7 +197,7 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 
 			String ext = resource.getFileExtension();
 			String[] customSettings = getCustomCompileOptions(resource);
-			if (EXT_ASM.equals(ext) || EXT_INC.equals(ext)) {
+			if (EXT_ASM.equalsIgnoreCase(ext) || EXT_INC.equalsIgnoreCase(ext)) {
 				String compilername = customSettings[0] != null ? customSettings[0]
 						: store.getString(PreferenceConstants.P_COMPILER);
 
@@ -217,14 +216,14 @@ public class AssemblyBuilder extends IncrementalProjectBuilder {
 				} else if (compilername.equalsIgnoreCase(PreferenceConstants.P_COMPILER_XA)) {
 					compiler = new XACompiler();
 				}
-			} else if (EXT_MDC.equals(ext)) {
+			} else if (EXT_MDC.equalsIgnoreCase(ext)) {
 				compiler = new MakeDiskCompiler();
-			} else if (EXT_DIS.equals(ext)) {
+			} else if (EXT_DIS.equalsIgnoreCase(ext)) {
 				compiler = new DiskImageBuilder();
 			}
 
 			if (compiler != null) {
-				if (!EXT_INC.equals(ext)) {
+				if (!EXT_INC.equalsIgnoreCase(ext)) {
 					compiler.compile(resource, new AssemblyErrorHandler(), monitor, store, null, customSettings[1]);
 					String postProcessor = customSettings[2] != null ? customSettings[2]
 							: store.getString(PreferenceConstants.P_POSTPROCESSORPATH);
